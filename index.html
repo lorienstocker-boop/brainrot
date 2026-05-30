@@ -98,6 +98,7 @@
 const DAILY_COOLDOWN = 24 * 60 * 60 * 1000;
 
 let packsOpened = parseInt(localStorage.getItem("packsOpened")) || 0;
+document.getElementById("count").textContent = packsOpened;
 
 const epicCards = {
   "tralalero tralala": "epic"
@@ -124,13 +125,7 @@ const commonCards = {
 
 let inventory = [];
 let coins = 60;
-let packsOpened = localStorage.getItem("packsOpened");
 
-if (packsOpened === null) {
-  packsOpened = 0;
-} else {
-  packsOpened = parseInt(packsOpened);
-}
 
 function saveGame() {
   localStorage.setItem("inventory", JSON.stringify(inventory));
@@ -243,10 +238,9 @@ function renderInventory() {
 
 function openPack(free = false) {
 
-  packsOpened++;
-  document.getElementById("count").textContent = packsOpened;
-  localStorage.setItem("packsOpened", packsOpened);
-  updatePacksText();
+packsOpened++;
+localStorage.setItem("packsOpened", packsOpened);
+document.getElementById("count").textContent = packsOpened;
   
   if (!free) {
 
