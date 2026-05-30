@@ -57,6 +57,8 @@
   <button onclick="openPack()">Open Pack</button>
   <button onclick="claimDailyPack()">Free Daily Pack!!! :3</button>
 
+  <p>Total Packs Opened: <span id="count">0</span></p>
+
   <br><br>
 
   <video id="packVideo" width="500" style="display:none;">
@@ -101,6 +103,7 @@ const commonCards = {
 
 let inventory = [];
 let coins = 60;
+let packsOpened = 0;
 
 function saveGame() {
   localStorage.setItem("inventory", JSON.stringify(inventory));
@@ -213,6 +216,9 @@ function renderInventory() {
 
 function openPack(free = false) {
 
+  packsOpened++;
+  document.getElementById("count").textContent = packsOpened;
+  
   if (!free) {
 
     if (coins < 20) {
