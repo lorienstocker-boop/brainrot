@@ -75,6 +75,10 @@
     <source src="videos/opening.mp4" type="video/mp4">
   </video>
 
+  <video id="squishVideo" width="500" style="display:none;">
+    <source src="videos/squish.mp4" type="video/mp4">
+  </video>
+
   <div id="result"></div>
   <div id="outcome"></div>
 
@@ -148,6 +152,20 @@ function addCardToInventory(card) {
   renderInventory();
 }
 
+  function squishCard(card) {
+  const video = document.getElementById("squishVideo");
+
+  video.style.display = "block";
+  video.currentTime = 0;
+  video.play();
+
+  video.onended = function () {
+    video.style.display = "none";
+  }; 
+    
+}
+  
+
 function sellCard(index) {
   coins += getCardValue(inventory[index].rarity);
   inventory.splice(index, 1);
@@ -164,14 +182,19 @@ function renderInventory() {
   `;
 
   inventory.forEach((card, index) => {
-    div.innerHTML += `
-      <div class="cardBox">
-        <h3>${card.name}</h3>
-        <p>Rarity: ${card.rarity}</p>
-        <p>Value: ${getCardValue(card.rarity)}</p>
-        <button onclick="sellCard(${index})">sell</button>
-      </div>
-    `;
+    const isTungSahur = card.name === "tung tung tung sahur";
+
+div.innerHTML += `
+  <div class="cardBox">
+    <h3>${card.name}</h3>
+    <p>Rarity: ${card.rarity}</p>
+    <p>Value: ${getCardValue(card.rarity)}</p>
+
+    <button onclick="sellCard(${index})">Sell</button>
+
+    ${isTungSahur ? `<button onclick='squishCard(${JSON.stringify(card)})'>Squish</button>` : ""}
+  </div>
+`;
   });
 
   if (inventory.length === 0) {
