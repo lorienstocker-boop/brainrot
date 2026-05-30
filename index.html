@@ -117,7 +117,13 @@ const commonCards = {
 
 let inventory = [];
 let coins = 60;
-let packsOpened = 0;
+let packsOpened = localStorage.getItem("packsOpened");
+
+if (packsOpened === null) {
+  packsOpened = 0;
+} else {
+  packsOpened = parseInt(packsOpened);
+}
 
 function saveGame() {
   localStorage.setItem("inventory", JSON.stringify(inventory));
