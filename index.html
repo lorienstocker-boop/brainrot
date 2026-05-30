@@ -97,6 +97,8 @@
 
 const DAILY_COOLDOWN = 24 * 60 * 60 * 1000;
 
+let packsOpened = parseInt(localStorage.getItem("packsOpened")) || 0;
+
 const epicCards = {
   "tralalero tralala": "epic"
 };
@@ -243,7 +245,8 @@ function openPack(free = false) {
 
   packsOpened++;
   document.getElementById("count").textContent = packsOpened;
-  saveGame()
+  localStorage.setItem("packsOpened", packsOpened);
+  updatePacksText();
   
   if (!free) {
 
