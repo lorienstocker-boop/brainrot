@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>brainrot booster pack opening simulation</title>
+
+  <style>
+
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background: #111;
+      color: white;
+      padding: 30px;
+    }
+
+    button {
+      font-size: 18px;
+      padding: 10px 20px;
+      cursor: pointer;
+      border-radius: 10px;
+      border: none;
+      margin-top: 10px;
+    }
+
+    img {
+      margin-top: 20px;
+      max-width: 300px;
+      border-radius: 12px;
+    }
+
+    #result {
+      font-size: 24px;
+      margin-top: 25px;
+    }
+
+    #inventory {
+      margin-top: 40px;
+    }
+
+    .cardBox {
+      background: #222;
+      border: 2px solid white;
+      border-radius: 15px;
+      padding: 15px;
+      margin: 15px auto;
+      width: 350px;
+    }
+
+  </style>
+</head>
+
+<body>
+
+  <h1>brainrot booster pack opening simulation</h1>
+
+  <button onclick="openPack()">Open Pack</button>
+  <button onclick="claimDailyPack()">Free Daily Pack!!! :3</button>
+
+  <br><br>
+
+  <video id="packVideo" width="500" style="display:none;">
+    <source src="videos/opening.mp4" type="video/mp4">
+  </video>
+
+  <div id="result"></div>
+  <div id="outcome"></div>
+
+  <img id="cardImage" src="" style="display:none;">
+
+  <div id="inventory">
+    <h2>Inventory</h2>
+  </div>
+
+<script>
+
+const DAILY_COOLDOWN = 24 * 60 * 60 * 1000;
+
+const epicCards = {
+  "tralalero tralala": "epic"
+};
+
+const insaneCards = {
+  "tung tung tung sahur": "insane",
+  "apple pen dude": "insane"
+};
+
+const rareCards = {
+  "ballerina cappucina": "rare",
+  "cappucino assassino": "rare"
+};
+
+const uncommonCards = {
+  "bombardino crocodilo": "uncommon"
+};
+
+const commonCards = {
+  "tripi tropi": "common",
+  "skibidi": "common"
+};
+
+let inventory = [];
+let coins = 60;
+
+function saveGame() {
+  localStorage.setItem("inventory", JSON.stringify(inventory));
+  localStorage.setItem("coins", coins);
+}
+
+function loadGame() {
+  const savedInventory = localStorage.getItem("inventory");
+  const savedCoins = localStorage.getItem("coins");
+
+  if (savedInventory) {
+    inventory = JSON.parse(savedInventory);
+  }
+
+  if (savedCoins) {
+    coins = parseInt(savedCoins);
+  }
+
+  renderInventory();
+}
+
+function chooseRandomCard(cards) {
+  const keys = Object.keys(cards);
+  const randomIndex = Math.floor(Math.random() * keys.length);
+  const card = keys[randomIndex];
+
+  return {
+    name: card,
+    rarity: cards[card]
+  };
+}
+
+function canClaimDaily() {
+  const lastClaim = localStorage.getItem("lastDailyPack");
+  if (!lastClaim) return true;
+
+  const now = Date.now();
+  return (now - parseInt(lastClaim)) > DAILY_COOLDOWN;
+}
+
+function claimDailyPack() {
+
+  if (!canClaimDaily()) {
+    const lastClaim = parseInt(localStorage.getItem("lastDailyPack"));
+    const timeLeft = DAILY_COOLDOWN - (Date.now() - lastClaim);
+
+    const hours = Math.floor(timeLeft / (1000 * 60 * 60));
+    const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+
+    alert(`Come back in ${hours}h ${minutes}m for your free pack!`);
+    return;
+  }
+
+  localStorage.setItem("lastDailyPack", Date.now());
+  openPack(true);
+}
+
+function getCardValue(rarity) {
+  if (rarity === "common") return 10;
+  if (rarity === "uncommon") return 25;
+  if (rarity === "rare") return 60;
+  if (rarity === "epic") return 150;
+  if (rarity === "insane") return 500;
+  return 0;
+}
+
+function addCardToInventory(card) {
+  inventory.push(card);
+  saveGame();
+  renderInventory();
+}
+
+function sellCard(index) {
+  const card = inventory[index];
+  coins += getCardValue(card.rarity);
+
+  inventory.splice(index, 1);
+
+  saveGame();
+  renderInventory();
+}
+
+function renderInventory() {
+
+  const inventoryDiv = document.getElementById("inventory");
+
+  inventoryDiv.innerHTML = `
+    <h2>Inventory</h2>
+    <h3>Coins: ${coins}</h3>
+  `;
+
+  inventory.forEach((card, index) => {
+
+    const value = getCardValue(card.rarity);
+
+    inventoryDiv.innerHTML += `
+      <div class="cardBox">
+        <h3>${card.name}</h3>
+        <p>Rarity: ${card.rarity}</p>
+        <p>Value: ${value} coins</p>
+        <button onclick="sellCard(${index})">Sell Card</button>
+      </div>
+    `;
+  });
+
+  if (inventory.length === 0) {
+    inventoryDiv.innerHTML += `<p>No cards yet.</p>`;
+  }
+}
+
+function openPack(free = false) {
+
+  if (!free) {
+
+    if (coins < 20) {
+      alert("Not enough coins! You need 20 coins.");
+      return;
+    }
+
+    coins -= 20;
+    saveGame();
+    renderInventory();
+  }
+
+  const randomNumber = Math.random();
+  let cards;
+
+  if (randomNumber < 0.03) {
+    cards = insaneCards;
+
+  } else if (randomNumber < 0.08) {
+    cards = epicCards;
+
+  } else if (randomNumber < 0.18) {
+    cards = rareCards;
+
+  } else if (randomNumber < 0.58) {
+    cards = uncommonCards;
+
+  } else {
+    cards = commonCards;
+  }
+
+  const card = chooseRandomCard(cards);
+
+  const video = document.getElementById("packVideo");
+  const result = document.getElementById("result");
+  const image = document.getElementById("cardImage");
+  const outcome = document.getElementById("outcome");
+
+  result.innerText = "";
+  outcome.innerText = "";
+  image.style.display = "none";
+
+  video.style.display = "block";
+  video.currentTime = 0;
+  video.play();
+
+  video.onended = function () {
+
+    video.style.display = "none";
+
+    result.innerText =
+      `You got ${card.name}, which is ${card.rarity} rarity!`;
+
+    image.src = `images/${card.name}.png`;
+    image.style.display = "block";
+
+    const value = getCardValue(card.rarity);
+
+    if (value >= 500) {
+      outcome.innerText = "SUPER WIN!!!!!!";
+      outcome.style.color = "gold";
+
+    } else if (value < 20) {
+      outcome.innerText = "LOSE";
+      outcome.style.color = "red";
+
+    } else {
+      outcome.innerText = "WIN!";
+      outcome.style.color = "lime";
+    }
+
+    addCardToInventory(card);
+  };
+}
+
+loadGame();
+
+</script>
+
+</body>
+</html>
