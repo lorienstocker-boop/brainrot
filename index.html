@@ -14,7 +14,7 @@
       padding: 30px;
     }
 
-    #packVideo {
+    #packVideo, #squishVideo {
       transition: transform 0.2s;
     }
 
@@ -66,7 +66,7 @@
 
   <h1>brainrot booster pack opening simulation</h1>
 
-  <button onclick="openPack()">Open Pack</button>
+  <button onclick="openPack()">open pack</button>
   <button onclick="claimDailyPack()">Free Daily Pack!!! :3</button>
 
   <p>Total Packs Opened: <span id="count">0</span></p>
@@ -103,6 +103,7 @@ const epicCards = {
 };
 
 const insaneCards = {
+  "tung tung tung sahur": "insane",
   "apple pen dude": "insane"
 };
 
@@ -112,7 +113,6 @@ const rareCards = {
 };
 
 const uncommonCards = {
-  "tung tung tung sahur": "uncommon",
   "bombardino crocodilo": "uncommon"
 };
 
@@ -152,7 +152,14 @@ function addCardToInventory(card) {
   renderInventory();
 }
 
-  function squishCard(card) {
+function sellCard(index) {
+  coins += getCardValue(inventory[index].rarity);
+  inventory.splice(index, 1);
+  saveGame();
+  renderInventory();
+}
+
+function squishCard() {
   const video = document.getElementById("squishVideo");
 
   video.style.display = "block";
@@ -161,16 +168,7 @@ function addCardToInventory(card) {
 
   video.onended = function () {
     video.style.display = "none";
-  }; 
-    
-}
-  
-
-function sellCard(index) {
-  coins += getCardValue(inventory[index].rarity);
-  inventory.splice(index, 1);
-  saveGame();
-  renderInventory();
+  };
 }
 
 function renderInventory() {
@@ -184,17 +182,16 @@ function renderInventory() {
   inventory.forEach((card, index) => {
     const isTungSahur = card.name === "tung tung tung sahur";
 
-div.innerHTML += `
-  <div class="cardBox">
-    <h3>${card.name}</h3>
-    <p>Rarity: ${card.rarity}</p>
-    <p>Value: ${getCardValue(card.rarity)}</p>
+    div.innerHTML += `
+      <div class="cardBox">
+        <h3>${card.name}</h3>
+        <p>Rarity: ${card.rarity}</p>
+        <p>Value: ${getCardValue(card.rarity)}</p>
 
-    <button onclick="sellCard(${index})">Sell</button>
-
-    ${isTungSahur ? `<button onclick='squishCard(${JSON.stringify(card)})'>Squish</button>` : ""}
-  </div>
-`;
+        <button onclick="sellCard(${index})">Sell</button>
+        ${isTungSahur ? `<button onclick="squishCard()">squish :3</button>` : ""}
+      </div>
+    `;
   });
 
   if (inventory.length === 0) {
@@ -210,7 +207,7 @@ function canClaimDaily() {
 
 function claimDailyPack() {
   if (!canClaimDaily()) {
-    alert("come back later for your free pack :3");
+    alert("come back later for your free pack!");
     return;
   }
 
@@ -261,7 +258,7 @@ function openPack(free = false) {
 
     video.style.display = "none";
 
-    result.innerText = `you got ${card.name} (${card.rarity})`;
+    result.innerText = `You got ${card.name} (${card.rarity})`;
 
     image.src = `images/${card.name}.png`;
     image.style.display = "block";
@@ -283,7 +280,10 @@ function openPack(free = false) {
   };
 }
 
-renderInventory();
+</script>
+
+</body>
+</html>
 
 </script>
 
