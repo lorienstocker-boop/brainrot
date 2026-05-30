@@ -5,12 +5,7 @@
   <link rel="icon" href="meep (2).ico">
   <title>brainrot booster pack opening simulation</title>
 
-  
-
   <style>
-
-    
-
     body {
       font-family: Arial, sans-serif;
       text-align: center;
@@ -20,12 +15,12 @@
     }
 
     #packVideo {
-  transition: transform 0.2s;
-}
+      transition: transform 0.2s;
+    }
 
-#packVideo:hover {
-  transform: scale(1.1);
-}
+    #packVideo:hover {
+      transform: scale(1.1);
+    }
 
     button {
       font-size: 18px;
@@ -34,7 +29,6 @@
       border-radius: 10px;
       border: none;
       margin-top: 10px;
-
       transition: transform 0.2s;
     }
 
@@ -65,7 +59,6 @@
       margin: 15px auto;
       width: 350px;
     }
-
   </style>
 </head>
 
@@ -77,8 +70,6 @@
   <button onclick="claimDailyPack()">Free Daily Pack!!! :3</button>
 
   <p>Total Packs Opened: <span id="count">0</span></p>
-
-  <br><br>
 
   <video id="packVideo" width="500" style="display:none;">
     <source src="videos/opening.mp4" type="video/mp4">
@@ -98,6 +89,9 @@
 const DAILY_COOLDOWN = 24 * 60 * 60 * 1000;
 
 let packsOpened = parseInt(localStorage.getItem("packsOpened")) || 0;
+let inventory = JSON.parse(localStorage.getItem("inventory")) || [];
+let coins = parseInt(localStorage.getItem("coins")) || 60;
+
 document.getElementById("count").textContent = packsOpened;
 
 const epicCards = {
@@ -123,64 +117,20 @@ const commonCards = {
   "skibidi": "common"
 };
 
-let inventory = [];
-let coins = 60;
-
-
 function saveGame() {
   localStorage.setItem("inventory", JSON.stringify(inventory));
   localStorage.setItem("coins", coins);
-}
-
-function loadGame() {
-  const savedInventory = localStorage.getItem("inventory");
-  const savedCoins = localStorage.getItem("coins");
-
-  if (savedInventory) {
-    inventory = JSON.parse(savedInventory);
-  }
-
-  if (savedCoins) {
-    coins = parseInt(savedCoins);
-  }
-
-  renderInventory();
+  localStorage.setItem("packsOpened", packsOpened);
 }
 
 function chooseRandomCard(cards) {
   const keys = Object.keys(cards);
-  const randomIndex = Math.floor(Math.random() * keys.length);
-  const card = keys[randomIndex];
+  const card = keys[Math.floor(Math.random() * keys.length)];
 
   return {
     name: card,
     rarity: cards[card]
   };
-}
-
-function canClaimDaily() {
-  const lastClaim = localStorage.getItem("lastDailyPack");
-  if (!lastClaim) return true;
-
-  const now = Date.now();
-  return (now - parseInt(lastClaim)) > DAILY_COOLDOWN;
-}
-
-function claimDailyPack() {
-
-  if (!canClaimDaily()) {
-    const lastClaim = parseInt(localStorage.getItem("lastDailyPack"));
-    const timeLeft = DAILY_COOLDOWN - (Date.now() - lastClaim);
-
-    const hours = Math.floor(timeLeft / (1000 * 60 * 60));
-    const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
-
-    alert(`Come back in ${hours}h ${minutes}m for your free pack!`);
-    return;
-  }
-
-  localStorage.setItem("lastDailyPack", Date.now());
-  openPack(true);
 }
 
 function getCardValue(rarity) {
@@ -199,79 +149,75 @@ function addCardToInventory(card) {
 }
 
 function sellCard(index) {
-  const card = inventory[index];
-  coins += getCardValue(card.rarity);
-
+  coins += getCardValue(inventory[index].rarity);
   inventory.splice(index, 1);
-
   saveGame();
   renderInventory();
 }
 
 function renderInventory() {
+  const div = document.getElementById("inventory");
 
-  const inventoryDiv = document.getElementById("inventory");
-
-  inventoryDiv.innerHTML = `
+  div.innerHTML = `
     <h2>Inventory</h2>
     <h3>Coins: ${coins}</h3>
   `;
 
   inventory.forEach((card, index) => {
-
-    const value = getCardValue(card.rarity);
-
-    inventoryDiv.innerHTML += `
+    div.innerHTML += `
       <div class="cardBox">
         <h3>${card.name}</h3>
         <p>Rarity: ${card.rarity}</p>
-        <p>Value: ${value} coins</p>
-        <button onclick="sellCard(${index})">Sell Card</button>
+        <p>Value: ${getCardValue(card.rarity)}</p>
+        <button onclick="sellCard(${index})">sell</button>
       </div>
     `;
   });
 
   if (inventory.length === 0) {
-    inventoryDiv.innerHTML += `<p>No cards yet.</p>`;
+    div.innerHTML += `<p>No cards yet.</p>`;
   }
+}
+
+function canClaimDaily() {
+  const last = localStorage.getItem("lastDailyPack");
+  if (!last) return true;
+  return Date.now() - parseInt(last) > DAILY_COOLDOWN;
+}
+
+function claimDailyPack() {
+  if (!canClaimDaily()) {
+    alert("come back later for your free pack :3");
+    return;
+  }
+
+  localStorage.setItem("lastDailyPack", Date.now());
+  openPack(true);
 }
 
 function openPack(free = false) {
 
-packsOpened++;
-localStorage.setItem("packsOpened", packsOpened);
-document.getElementById("count").textContent = packsOpened;
-  
   if (!free) {
-
     if (coins < 20) {
-      alert("Not enough coins! You need 20 coins.");
+      alert("not enough coins :(");
       return;
     }
-
     coins -= 20;
-    saveGame();
-    renderInventory();
   }
 
-  const randomNumber = Math.random();
+  packsOpened++;
+  document.getElementById("count").textContent = packsOpened;
+  saveGame();
+  renderInventory();
+
+  const roll = Math.random();
   let cards;
 
-  if (randomNumber < 0.03) {
-    cards = insaneCards;
-
-  } else if (randomNumber < 0.08) {
-    cards = epicCards;
-
-  } else if (randomNumber < 0.18) {
-    cards = rareCards;
-
-  } else if (randomNumber < 0.58) {
-    cards = uncommonCards;
-
-  } else {
-    cards = commonCards;
-  }
+  if (roll < 0.03) cards = insaneCards;
+  else if (roll < 0.08) cards = epicCards;
+  else if (roll < 0.18) cards = rareCards;
+  else if (roll < 0.58) cards = uncommonCards;
+  else cards = commonCards;
 
   const card = chooseRandomCard(cards);
 
@@ -292,8 +238,7 @@ document.getElementById("count").textContent = packsOpened;
 
     video.style.display = "none";
 
-    result.innerText =
-      `You got ${card.name}, which is ${card.rarity} rarity!`;
+    result.innerText = `you got ${card.name} (${card.rarity})`;
 
     image.src = `images/${card.name}.png`;
     image.style.display = "block";
@@ -303,11 +248,9 @@ document.getElementById("count").textContent = packsOpened;
     if (value >= 500) {
       outcome.innerText = "SUPER WIN!!!!!!";
       outcome.style.color = "gold";
-
     } else if (value < 20) {
       outcome.innerText = "LOSE";
       outcome.style.color = "red";
-
     } else {
       outcome.innerText = "WIN!";
       outcome.style.color = "lime";
@@ -317,7 +260,7 @@ document.getElementById("count").textContent = packsOpened;
   };
 }
 
-loadGame();
+renderInventory();
 
 </script>
 
