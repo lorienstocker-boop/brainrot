@@ -101,7 +101,11 @@
     <h2>brainrot pack opening simulator</h2>
 
     <button onclick="openPack()">open 1 pack</button>
-    <button onclick="openDaily()">free daily pack</button>
+    <p id="dailyTimer"></p>
+
+    <button id="dailyBtn" onclick="claimDailyPack()">
+    claim daily pack
+    </button>
 
     <div id="result"></div>
     
@@ -382,6 +386,58 @@ loadShelf();
 setInterval(loadShelf, 4000);
 
 </script>
+<script>
+const dailyBtn = document.getElementById("dailyBtn");
+const dailyTimer = document.getElementById("dailyTimer");
+
+const COOLDOWN = 24 * 60 * 60 * 1000;
+
+function claimDailyPack() {
+  const lastClaim = localStorage.getItem("dailyClaim");
+
+  if (lastClaim && Date.now() - lastClaim < COOLDOWN) {
+    alert("Daily pack not ready yet!");
+    return;
+  }
+
+  localStorage.setItem("dailyClaim", Date.now());
+
+  alert("You claimed your daily pack!");
+
+  updateDailyTimer();
+}
+
+function updateDailyTimer() {
+  const lastClaim = localStorage.getItem("dailyClaim");
+
+  if (!lastClaim) {
+    dailyBtn.disabled = false;
+    dailyTimer.innerText = "Daily pack ready!";
+    return;
+  }
+
+  const timeLeft = COOLDOWN - (Date.now() - lastClaim);
+
+  if (timeLeft <= 0) {
+    dailyBtn.disabled = false;
+    dailyTimer.innerText = "Daily pack ready!";
+    return;
+  }
+
+  dailyBtn.disabled = true;
+
+  const hours = Math.floor(timeLeft / (1000 * 60 * 60));
+  const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+  const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+
+  dailyTimer.innerText =
+    `Next free pack in ${hours}h ${minutes}m ${seconds}s`;
+}
+
+setInterval(updateDailyTimer, 1000);
+updateDailyTimer();
+</script>
+  
 
 </body>
 </html>
