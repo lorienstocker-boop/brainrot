@@ -66,33 +66,43 @@
     }
 
     #shelfContainer {
-      position: relative;
-      width: 700px;
-      height: 500px;
-      margin: 20px auto;
+      width: 100%;
+      overflow-x: auto;
+      overflow-y: hidden;
+      white-space: nowrap;
+      border-radius: 10px;
+    }
+
+    #shelfTrack {
+      display: flex;
+      width: max-content;
+    }
+
+    .shelfItem {
+      width: 90px;
+      height: 110px;
+      background: #222;
+      border: 2px solid white;
+      border-radius: 10px;
+      padding: 5px;
+      margin: 10px;
+      text-align: center;
+      font-size: 12px;
+      flex-shrink: 0;
+    }
+
+    #shelfContainer::-webkit-scrollbar {
+      display: none;
     }
 
     p, h1, h2, h3, span {
-  transition: transform 0.15s ease, text-shadow 0.15s ease;
-  display: inline-block;
-}
-
-p:hover, h1:hover, h2:hover, h3:hover, span:hover {
-  transform: scale(1.08);
-  text-shadow: 0 0 10px rgba(255,255,255,0.6);
-}
-
-    #shelfImg {
-      width: 100%;
-      display: block;
+      transition: transform 0.15s ease, text-shadow 0.15s ease;
+      display: inline-block;
     }
 
-    #shelfItems {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
+    p:hover, h1:hover, h2:hover, h3:hover, span:hover {
+      transform: scale(1.08);
+      text-shadow: 0 0 10px rgba(255,255,255,0.6);
     }
   </style>
 </head>
@@ -120,11 +130,11 @@ p:hover, h1:hover, h2:hover, h3:hover, span:hover {
     <div id="result"></div>
     
     <video id="squishVideo" style="display:none;">
-    <source src="videos/squish.mp4">
-     </video>
+      <source src="videos/squish.mp4">
+    </video>
 
     <video id="packVideo" style="display:none;">
-    <source src="videos/opening.mp4">
+      <source src="videos/opening.mp4">
     </video>
 
     <img id="cardImg" style="display:none; max-width:250px;">
@@ -143,11 +153,9 @@ p:hover, h1:hover, h2:hover, h3:hover, span:hover {
   <button onclick="loadShelf()">refresh shelf</button>
 
   <div id="shelfContainer">
-    <img src="images/shelf.png" id="shelfImg">
-    <div id="shelfItems"></div>
+    <div id="shelfTrack"></div>
   </div>
 </div>
-
 
 <script>
 
@@ -219,7 +227,6 @@ function randomCard() {
 }
 
 function value(rarity) {
-
   return {
     common: 10,
     uncommon: 25,
@@ -233,19 +240,14 @@ function renderInventory() {
 
   const div = document.getElementById("inventory");
 
-  div.innerHTML = `
-    <p>coins: ${coins}</p>
-  `;
+  div.innerHTML = `<p>coins: ${coins}</p>`;
 
   inventory.forEach((card, i) => {
 
-    let buttons =
-      `<button onclick="sell(${i})">sell</button>`;
+    let buttons = `<button onclick="sell(${i})">sell</button>`;
 
     if (card.name === "tung tung tung sahur") {
-
-      buttons +=
-        `<button onclick="squish()">squish</button>`;
+      buttons += `<button onclick="squish()">squish</button>`;
     }
 
     div.innerHTML += `
@@ -259,39 +261,25 @@ function renderInventory() {
 }
 
 function sell(i) {
-
   coins += value(inventory[i].rarity);
-
   inventory.splice(i, 1);
-
   save();
-
   renderInventory();
 }
 
 function squish() {
-
-  const video =
-    document.getElementById("squishVideo");
-
+  const video = document.getElementById("squishVideo");
   video.style.display = "block";
-
   video.currentTime = 0;
-
   video.play();
-
-  video.onended = () => {
-
-    video.style.display = "none";
-  };
+  video.onended = () => video.style.display = "none";
 }
 
 async function addToShelf(card) {
-
-  await supabaseClient
-    .from("shelf")
-    .insert([card]);
+  await supabaseClient.from("shelf").insert([card]);
 }
+
+let shelfData = [];
 
 async function loadShelf() {
 
@@ -301,40 +289,39 @@ async function loadShelf() {
       .select("*")
       .order("id", { ascending: false });
 
-  if (error) {
-    console.log(error);
-    return;
-  }
+  if (error) return console.log(error);
 
-  const div =
-    document.getElementById("shelfItems");
+  shelfData = data || [];
 
-  div.innerHTML = "";
+  const track = document.getElementById("shelfTrack");
 
-  (data || []).forEach((item, i) => {
+  track.innerHTML = "";
 
-    div.innerHTML += `
-      <div style="
-        position:absolute;
-        left:${(i % 5) * 120 + 40}px;
-        top:${Math.floor(i / 5) * 145 + 40}px;
-        width:90px;
-        background:#222;
-        border:2px solid white;
-        border-radius:10px;
-        padding:5px;
-        font-size:12px;
-        text-align:center;
-      ">
+
+  const loopData = shelfData.concat(shelfData);
+
+  loopData.forEach(item => {
+    track.innerHTML += `
+      <div class="shelfItem">
         ${item.name}
       </div>
     `;
   });
 }
 
-function openDaily() {
-  openPack(true);
-}
+
+const container = document.getElementById("shelfContainer");
+
+setInterval(() => {
+  if (!container) return;
+
+  const half = container.scrollWidth / 2;
+
+  if (container.scrollLeft >= half) {
+    container.scrollLeft = 0;
+  }
+}, 50);
+
 
 function openPack(free = false) {
 
@@ -346,23 +333,15 @@ function openPack(free = false) {
 
   save();
 
-  const video =
-    document.getElementById("packVideo");
-
-  const result =
-    document.getElementById("result");
-
-  const img =
-    document.getElementById("cardImg");
+  const video = document.getElementById("packVideo");
+  const result = document.getElementById("result");
+  const img = document.getElementById("cardImg");
 
   result.innerText = "";
-
   img.style.display = "none";
 
   video.style.display = "block";
-
   video.currentTime = 0;
-
   video.play();
 
   video.onended = async () => {
@@ -370,32 +349,25 @@ function openPack(free = false) {
     video.style.display = "none";
 
     inventory.push(card);
-
     save();
-
     renderInventory();
 
     await addToShelf(card);
-
     loadShelf();
 
-    result.innerText =
-      `You got ${card.name} (${card.rarity})`;
+    result.innerText = `You got ${card.name} (${card.rarity})`;
 
-    img.src =
-      `images/${card.name}.png`;
-
+    img.src = `images/${card.name}.png`;
     img.style.display = "block";
   };
 }
 
 renderInventory();
-
 loadShelf();
-
 setInterval(loadShelf, 4000);
 
 </script>
+
 <script>
 const dailyBtn = document.getElementById("dailyBtn");
 const dailyTimer = document.getElementById("dailyTimer");
@@ -413,9 +385,7 @@ function claimDailyPack() {
   localStorage.setItem("dailyClaim", Date.now());
 
   alert("You claimed your daily pack!");
-  
   openPack();
-
   updateDailyTimer();
 }
 
@@ -449,7 +419,6 @@ function updateDailyTimer() {
 setInterval(updateDailyTimer, 1000);
 updateDailyTimer();
 </script>
-  
 
 </body>
 </html>
