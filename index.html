@@ -99,8 +99,8 @@
   <div class="panel">
     <h2>brainrot pack opening simulator</h2>
 
-    <button onclick="Game.openPack()">Open Pack</button>
-    <button onclick="Game.claimDaily()">Free Daily Pack</button>
+    <button onclick="Game.openPack()">open 1 pack</button>
+    <button onclick="openDaily()">free daily pack</button>
 
     <video id="packVideo" style="display:none;">
       <source src="videos/opening.mp4">
@@ -187,6 +187,10 @@ function value(r) {
   return { common:10, uncommon:25, rare:60, epic:150, insane:500 }[r];
 }
 
+  function openDaily() {
+  openPack();
+}
+
 
 function renderInventory() {
   const div = document.getElementById("inventory");
@@ -233,7 +237,7 @@ async function addToShelf(card) {
 async function loadShelf() {
   const { data } = await supabase.from("shelf").select("*");
 
-  const div = document.getElementById("shelf");
+  const div = document.getElementById("shelfItems");
   div.innerHTML = "";
 
   (data || []).forEach((item, i) => {
@@ -257,20 +261,34 @@ async function loadShelf() {
 
 
 function openPack() {
+
   const card = randomCard();
 
   packs++;
   localStorage.setItem("packs", packs);
   document.getElementById("packs").innerText = packs;
 
-  inventory.push(card);
-  localStorage.setItem("inv", JSON.stringify(inventory));
-  renderInventory();
+  const video = document.getElementById("packVideo");
 
-  addToShelf(card);
+  video.style.display = "block";
+  video.currentTime = 0;
+  video.play();
 
-  document.getElementById("result").innerText =
-    `You got ${card.name} (${card.rarity})`;
+  video.onended = () => {
+
+    video.style.display = "none";
+
+    inventory.push(card);
+
+    localStorage.setItem("inv", JSON.stringify(inventory));
+
+    renderInventory();
+
+    addToShelf(card);
+
+    document.getElementById("result").innerText =
+      `You got ${card.name} (${card.rarity})`;
+  };
 }
 
 
