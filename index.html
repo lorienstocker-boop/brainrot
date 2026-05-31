@@ -65,15 +65,18 @@
       margin: 10px 0;
     }
 
-  
+    /* =========================
+       FIXED VERTICAL SHELF
+       ========================= */
 
     #shelfContainer {
       position: relative;
       width: 700px;
       height: 500px;
       margin: 20px auto;
-      overflow-x: auto;
-      overflow-y: hidden;
+
+      overflow-y: auto;
+      overflow-x: hidden;
     }
 
     #shelfContainer::-webkit-scrollbar {
@@ -82,7 +85,6 @@
 
     #shelfImg {
       width: 100%;
-      display: block;
       position: absolute;
       top: 0;
       left: 0;
@@ -90,14 +92,14 @@
     }
 
     #shelfItems {
-      position: absolute;
-      top: 0;
-      left: 0;
-      display: flex;
-      flex-wrap: nowrap;
-      width: max-content;
+      position: relative;
       z-index: 1;
-      padding-top: 40px;
+
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 10px;
+
+      padding: 60px 20px;
     }
 
     .shelfItem {
@@ -107,10 +109,8 @@
       border: 2px solid white;
       border-radius: 10px;
       padding: 5px;
-      margin: 10px;
       text-align: center;
       font-size: 12px;
-      flex-shrink: 0;
     }
 
     p, h1, h2, h3, span {
@@ -137,13 +137,13 @@
   <div class="panel">
     <h2>packs</h2>
     <button onclick="openPack()">open 1 pack</button>
+    <div id="result"></div>
 
     <video id="packVideo" style="display:none;">
       <source src="videos/opening.mp4">
     </video>
 
     <img id="cardImg" style="display:none; max-width:250px;">
-    <div id="result"></div>
   </div>
 
 </div>
@@ -166,9 +166,17 @@ const supabaseClient = window.supabase.createClient(
   "sb_publishable_4bjO8-2p6WIw0XxU8zDg9Q_Ydpffo8t"
 );
 
+function randomCard() {
+  const names = ["skibidi", "john pork", "tung tung tung sahur", "bombardino crocodilo"];
+  return {
+    name: names[Math.floor(Math.random() * names.length)],
+    rarity: "common"
+  };
+}
 
-
-let shelfData = [];
+/* =========================
+   SHELF SYSTEM FIXED
+   ========================= */
 
 async function loadShelf() {
 
@@ -180,14 +188,11 @@ async function loadShelf() {
 
   if (error) return console.log(error);
 
-  shelfData = data || [];
-
   const div = document.getElementById("shelfItems");
 
   div.innerHTML = "";
 
-
-  const loop = shelfData.concat(shelfData);
+  const loop = (data || []).concat(data || []);
 
   loop.forEach(item => {
     div.innerHTML += `
@@ -198,15 +203,17 @@ async function loadShelf() {
   });
 }
 
-
+/* 🔥 infinite vertical scroll */
 const container = document.getElementById("shelfContainer");
 
 setInterval(() => {
-  const half = container.scrollWidth / 2;
 
-  if (container.scrollLeft >= half) {
-    container.scrollLeft = 0;
+  const half = container.scrollHeight / 2;
+
+  if (container.scrollTop >= half) {
+    container.scrollTop = 0;
   }
+
 }, 50);
 
 </script>
