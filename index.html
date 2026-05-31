@@ -5,6 +5,7 @@
   <meta charset="UTF-8" />
   <title>Brainrot Pack Simulator</title>
 
+
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4704601434785623"
   crossorigin="anonymous"></script>
 
@@ -39,15 +40,15 @@
     }
 
     #squishVideo {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 400px;
-    border-radius: 12px;
-    display: none;
-    z-index: 9999;
-    box-shadow: 0 0 30px rgba(0,0,0,0.6);
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 400px;
+      border-radius: 12px;
+      display: none;
+      z-index: 9999;
+      box-shadow: 0 0 30px rgba(0,0,0,0.6);
     }
 
     .cardBox {
@@ -71,14 +72,14 @@
     }
 
     p, h1, h2, h3, span {
-  transition: transform 0.15s ease, text-shadow 0.15s ease;
-  display: inline-block;
-}
+      transition: transform 0.15s ease, text-shadow 0.15s ease;
+      display: inline-block;
+    }
 
-p:hover, h1:hover, h2:hover, h3:hover, span:hover {
-  transform: scale(1.08);
-  text-shadow: 0 0 10px rgba(255,255,255,0.6);
-}
+    p:hover, h1:hover, h2:hover, h3:hover, span:hover {
+      transform: scale(1.08);
+      text-shadow: 0 0 10px rgba(255,255,255,0.6);
+    }
 
     #shelfScroll {
       position: absolute;
@@ -86,30 +87,46 @@ p:hover, h1:hover, h2:hover, h3:hover, span:hover {
       left: 20px;
       right: 20px;
       bottom: 20px;
-
       overflow-y: auto;
       max-height: 300px;
       padding: 10px;
+    }
+
+    
+    .ad {
+      width: 160px;
+      min-height: 600px;
+    }
+
+    .page {
+      display: flex;
+      justify-content: space-between;
+    }
+
+    main {
+      flex: 1;
     }
   </style>
 </head>
 
 <body>
+
 <div class="page">
 
+  <!-- LEFT AD -->
   <aside class="ad ad-left">
-   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4704601434785623"
-     crossorigin="anonymous"></script>
-<ins class="adsbygoogle"
-     style="display:block"
-     data-ad-client="ca-pub-4704601434785623"
-     data-ad-slot="1678594503"
-     data-ad-format="auto"
-     data-full-width-responsive="true"></ins>
-<script>
-     (adsbygoogle = window.adsbygoogle || []).push({});
-</script>
+    <ins class="adsbygoogle"
+         style="display:block"
+         data-ad-client="ca-pub-4704601434785623"
+         data-ad-slot="1678594503"
+         data-ad-format="auto"
+         data-full-width-responsive="true"></ins>
+
+    <script>
+      (adsbygoogle = window.adsbygoogle || []).push({});
+    </script>
   </aside>
+
 <main>
 
 <h1>brainrot pack opening simulator</h1>
@@ -243,16 +260,6 @@ function squish() {
   const video = document.getElementById("squishVideo");
   const overlay = document.getElementById("overlay");
 
-  if (!video) {
-    alert("squishVideo not found in HTML");
-    return;
-  }
-
-  if (!overlay) {
-    alert("overlay not found in HTML");
-    return;
-  }
-
   overlay.style.display = "block";
   video.style.display = "block";
 
@@ -263,14 +270,7 @@ function squish() {
   video.style.zIndex = "9999";
 
   video.currentTime = 0;
-
-  const playPromise = video.play();
-
-  if (playPromise !== undefined) {
-    playPromise.catch(err => {
-      console.log("Video play blocked:", err);
-    });
-  }
+  video.play();
 
   video.onended = () => {
     video.style.display = "none";
@@ -288,12 +288,9 @@ function openPack() {
   }
 
   coins -= 10;
-  document.getElementById("coins").innerText = coins;
   updateUI();
 
-
   packs++;
-  document.getElementById("count").innerText = packs;
   save();
 
   let video = document.getElementById("packVideo");
@@ -345,7 +342,7 @@ function renderShelf() {
   let div = document.getElementById("shelfScroll");
   div.innerHTML = "";
 
-  inventory.forEach((c, i) => {
+  inventory.forEach((c) => {
     div.innerHTML += `
       <div class="cardBox">
         ${c.name}
@@ -366,20 +363,21 @@ renderShelf();
 
 </main>
 
+
   <aside class="ad ad-right">
-   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4704601434785623"
-     crossorigin="anonymous"></script>
-<ins class="adsbygoogle"
-     style="display:block"
-     data-ad-client="ca-pub-4704601434785623"
-     data-ad-slot="1678594503"
-     data-ad-format="auto"
-     data-full-width-responsive="true"></ins>
-<script>
-     (adsbygoogle = window.adsbygoogle || []).push({});
-</script>
+    <ins class="adsbygoogle"
+         style="display:block"
+         data-ad-client="ca-pub-4704601434785623"
+         data-ad-slot="1678594503"
+         data-ad-format="auto"
+         data-full-width-responsive="true"></ins>
+
+    <script>
+      (adsbygoogle = window.adsbygoogle || []).push({});
+    </script>
   </aside>
+
 </div>
-  
+
 </body>
 </html>
