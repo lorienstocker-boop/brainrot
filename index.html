@@ -6,146 +6,152 @@
   <title>Brainrot Pack Simulator</title>
 
   <link rel="icon" href="meep (2).ico">
-
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <style>
     body {
+      margin: 0;
       font-family: Arial;
-      text-align: center;
       background: linear-gradient(90deg, #FFD014, #805280);
       color: white;
-      padding: 30px;
+    }
+
+    .header {
+      text-align: center;
+      padding: 20px;
+    }
+
+    .main {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      flex-wrap: wrap;
+      padding: 20px;
+    }
+
+    .panel {
+      background: rgba(0,0,0,0.35);
+      padding: 20px;
+      border-radius: 15px;
+      width: 420px;
+      backdrop-filter: blur(6px);
     }
 
     button {
-      padding: 10px 20px;
-      font-size: 18px;
+      padding: 10px 16px;
+      font-size: 16px;
       border: none;
       border-radius: 10px;
       margin: 5px;
       cursor: pointer;
-      transition: transform 0.2s;
+      transition: transform 0.15s;
     }
 
-    button:hover { transform: scale(1.05); }
+    button:hover {
+      transform: scale(1.05);
+    }
+
+    #packVideo, #squishVideo {
+      width: 100%;
+      border-radius: 12px;
+      margin-top: 10px;
+    }
 
     .cardBox {
       background: #222;
       border: 2px solid white;
-      border-radius: 15px;
-      padding: 15px;
-      margin: 10px auto;
-      width: 320px;
+      border-radius: 12px;
+      padding: 10px;
+      margin: 10px 0;
     }
 
     #shelfContainer {
-  position: relative;
-  width: 600px;
-  margin: auto;
-}
-
-#shelfImg {
-  width: 100%;
-  display: block;
-}
-
-#shelfItems {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-}
-
-    #packVideo, #squishVideo {
-      transition: transform 0.2s;
+      position: relative;
+      width: 700px;
+      margin: 20px auto;
     }
 
-    #shelf {
-  position: relative;
-  height: 400px;
-}
+    #shelfImg {
+      width: 100%;
+      display: block;
+    }
 
-    #packVideo:hover { transform: scale(1.1); }
+    #shelfItems {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+    }
   </style>
 </head>
 
 <body>
 
-<h1>Brainrot Pack Simulator</h1>
-
-<button onclick="Game.openPack()">Open Pack</button>
-<button onclick="Game.claimDaily()">Free Daily Pack</button>
-
-<p>Packs: <span id="packs">0</span></p>
-<p id="timer"></p>
-
-<h2>Global Shelf</h2>
-<button onclick="Shelf.load()">Refresh</button>
-<div id="shelf"></div>
-
-<div id="shelfContainer">
-<img src="images/shelf.png" id="shelfImg">
-<div id="shelfItems"></div>
+<div class="header">
+  <h1>brainrot pack opening simulator</h1>
+  <p>Packs: <span id="packs">0</span></p>
+  <p id="timer"></p>
 </div>
 
-<video id="packVideo" width="400" style="display:none;">
-  <source src="videos/opening.mp4">
+<div class="main">
+
+
+  <div class="panel">
+    <h2>brainrot pack opening simulator</h2>
+
+    <button onclick="Game.openPack()">Open Pack</button>
+    <button onclick="Game.claimDaily()">Free Daily Pack</button>
+
+    <video id="packVideo" style="display:none;">
+      <source src="videos/opening.mp4">
+    </video>
+
+    <div id="result"></div>
+    <img id="cardImg" style="display:none; max-width:250px;">
+  </div>
+
+
+  <div class="panel">
+    <h2>inventory</h2>
+    <div id="inventory"></div>
+  </div>
+
+</div>
+
+
+<div class="panel" style="width: 700px; margin: auto;">
+  <h2>global shelf</h2>
+  <button onclick="Shelf.load()">refresh shelf</button>
+
+  <div id="shelf"></div>
+
+  <div id="shelfContainer">
+    <img src="images/shelf.png" id="shelfImg">
+    <div id="shelfItems"></div>
+  </div>
+</div>
+
+
+<video id="squishVideo" style="display:none;">
+  <source src="videos/squish.mp4">
 </video>
 
-<div id="result"></div>
-<img id="cardImg" style="display:none; max-width:250px;">
-
-<div id="inventory"></div>
-
-  
-
 <script>
-/* =========================
-   STORAGE MODULE
-========================= */
-const Storage = {
-  get(key, fallback) {
-    try {
-      return JSON.parse(localStorage.getItem(key)) ?? fallback;
-    } catch {
-      return fallback;
-    }
-  },
 
-  set(key, value) {
-    localStorage.setItem(key, JSON.stringify(value));
-  }
-};
 
-/* =========================
-   SUPABASE MODULE
-========================= */
-const SupabaseClient = (() => {
-  const client = window.supabase.createClient(
-    "https://istttzdbafsurjrefdwm.supabase.co",
-    "sb_publishable_4bjO8-2p6WIw0XxU8zDg9Q_Ydpffo8t"
-  );
+const supabase = window.supabase.createClient(
+  "https://istttzdbafsurjrefdwm.supabase.co",
+  "sb_publishable_4bjO8-2p6WIw0XxU8zDg9Q_Ydpffo8t"
+);
 
-  return {
-    async addCard(card) {
-      await client.from("shelf").insert([card]);
-    },
 
-    async getShelf() {
-      const { data } = await client
-        .from("shelf")
-        .select("*")
-        .order("id", { ascending: false });
+let packs = parseInt(localStorage.getItem("packs")) || 0;
+let coins = 60;
+let inventory = JSON.parse(localStorage.getItem("inv") || "[]");
 
-      return data || [];
-    }
-  };
-})();
+document.getElementById("packs").innerText = packs;
 
-/* =========================
-   GAME DATA
-========================= */
+
 const Cards = {
   epic: { "tralalero tralala": "epic" },
   insane: { "apple pen dude": "insane" },
@@ -158,34 +164,13 @@ const Cards = {
     "tung tung tung sahur": "uncommon"
   },
   common: {
-    "tripi tropi": "common",
-    "skibidi": "common"
+    "skibidi": "common",
+    "tripi tropi": "common"
   }
 };
 
-/* =========================
-   GAME STATE
-========================= */
-const State = {
-  packs: Storage.get("packs", 0),
-  coins: Storage.get("coins", 60),
-  inventory: Storage.get("inv", []),
-  lastDaily: Storage.get("daily", 0)
-};
-
-function save() {
-  Storage.set("packs", State.packs);
-  Storage.set("coins", State.coins);
-  Storage.set("inv", State.inventory);
-  Storage.set("daily", State.lastDaily);
-}
-
-/* =========================
-   GAME LOGIC
-========================= */
-function getRandomCard() {
-  const roll = Math.random();
-
+function randomCard() {
+  let roll = Math.random();
   let pool =
     roll < 0.03 ? Cards.insane :
     roll < 0.08 ? Cards.epic :
@@ -193,75 +178,70 @@ function getRandomCard() {
     roll < 0.58 ? Cards.uncommon :
     Cards.common;
 
-  const keys = Object.keys(pool);
-  const name = keys[Math.floor(Math.random() * keys.length)];
-
+  let keys = Object.keys(pool);
+  let name = keys[Math.floor(Math.random() * keys.length)];
   return { name, rarity: pool[name] };
 }
 
-function rarityValue(r) {
-  return { common: 10, uncommon: 25, rare: 60, epic: 150, insane: 500 }[r] || 10;
+function value(r) {
+  return { common:10, uncommon:25, rare:60, epic:150, insane:500 }[r];
 }
 
-/* =========================
-   INVENTORY MODULE
-========================= */
-const Inventory = {
-  add(card) {
-    State.inventory.push(card);
-    save();
-    this.render();
-  },
 
-  render() {
-    const div = document.getElementById("inventory");
-    div.innerHTML = "";
+function renderInventory() {
+  const div = document.getElementById("inventory");
+  div.innerHTML = "";
 
-    div.innerHTML = `<h2>Inventory</h2><p>Coins: ${State.coins}</p>`;
+  inventory.forEach((c, i) => {
+    let btn = `<button onclick="sell(${i})">sell</button>`;
 
-    State.inventory.forEach((c, i) => {
-      div.innerHTML += `
-        <div class="cardBox">
-          <h3>${c.name}</h3>
-          <p>${c.rarity}</p>
-          <button onclick="Inventory.sell(${i})">sell</button>
-        </div>
-      `;
-    });
-  },
-
-  sell(i) {
-    State.coins += rarityValue(State.inventory[i].rarity);
-    State.inventory.splice(i, 1);
-    save();
-    this.render();
-  }
-};
-
-/* =========================
-   SHELF MODULE
-========================= */
-const Shelf = {
-  async add(card) {
-    try {
-      await SupabaseClient.addCard(card);
-    } catch (e) {
-      console.log(e);
+    if (c.name === "tung tung tung sahur") {
+      btn += `<button onclick="squish()">squish</button>`;
     }
-  },
 
-  async load() {
-  const data = await SupabaseClient.getShelf();
+    div.innerHTML += `
+      <div class="cardBox">
+        <b>${c.name}</b><br>
+        ${c.rarity}<br>
+        ${btn}
+      </div>
+    `;
+  });
+}
+
+function sell(i) {
+  coins += value(inventory[i].rarity);
+  inventory.splice(i,1);
+  save();
+  renderInventory();
+}
+
+
+function squish() {
+  const v = document.getElementById("squishVideo");
+  v.style.display = "block";
+  v.currentTime = 0;
+  v.play();
+  v.onended = () => v.style.display = "none";
+}
+
+
+async function addToShelf(card) {
+  await supabase.from("shelf").insert([card]);
+}
+
+async function loadShelf() {
+  const { data } = await supabase.from("shelf").select("*");
 
   const div = document.getElementById("shelf");
   div.innerHTML = "";
 
-  data.forEach((item, i) => {
+  (data || []).forEach((item, i) => {
     div.innerHTML += `
       <div style="
         position:absolute;
-        left:${(i % 5) * 110}px;
-        top:${Math.floor(i / 5) * 140}px;
+        left:${(i%5)*120}px;
+        top:${Math.floor(i/5)*140}px;
         width:100px;
         background:#222;
         border:2px solid white;
@@ -274,78 +254,29 @@ const Shelf = {
     `;
   });
 }
-};
 
-/* =========================
-   GAME MODULE
-========================= */
-const Game = {
-  openPack(free = false) {
 
-    if (!free) {
-      if (State.coins < 20) return alert("Not enough coins");
-      State.coins -= 20;
-    }
+function openPack() {
+  const card = randomCard();
 
-    const card = getRandomCard();
+  packs++;
+  localStorage.setItem("packs", packs);
+  document.getElementById("packs").innerText = packs;
 
-    State.packs++;
-    save();
+  inventory.push(card);
+  localStorage.setItem("inv", JSON.stringify(inventory));
+  renderInventory();
 
-    document.getElementById("packs").innerText = State.packs;
+  addToShelf(card);
 
-    const video = document.getElementById("packVideo");
-    const result = document.getElementById("result");
-    const img = document.getElementById("cardImg");
+  document.getElementById("result").innerText =
+    `You got ${card.name} (${card.rarity})`;
+}
 
-    result.innerText = "";
-    img.style.display = "none";
 
-    video.style.display = "block";
-    video.currentTime = 0;
-    video.play();
-
-    video.onended = async () => {
-      video.style.display = "none";
-
-      result.innerText = `You got ${card.name} (${card.rarity})`;
-      img.src = `images/${card.name}.png`;
-      img.style.display = "block";
-
-      Inventory.add(card);
-      await Shelf.add(card);
-    };
-  },
-
-  claimDaily() {
-    const now = Date.now();
-
-    if (now - State.lastDaily < 86400000) {
-      return alert("Come back later!");
-    }
-
-    State.lastDaily = now;
-    save();
-    this.openPack(true);
-  }
-};
-
-/* =========================
-   INIT
-========================= */
-Inventory.render();
-Shelf.load();
-
-setInterval(() => {
-  const el = document.getElementById("timer");
-  const left = 86400000 - (Date.now() - State.lastDaily);
-
-  el.innerText = left <= 0
-    ? "Daily ready!"
-    : `Next daily in ${Math.floor(left/3600000)}h`;
-}, 1000);
-
-document.getElementById("packs").innerText = State.packs;
+renderInventory();
+loadShelf();
+setInterval(loadShelf, 4000);
 
 </script>
 
