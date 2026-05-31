@@ -3,7 +3,6 @@
 
 <head>
   <meta charset="UTF-8" />
-  <title>brainrot pack opening simulator</title>
   <title>Brainrot Pack Simulator</title>
 
   <link rel="icon" href="meep (2).ico">
@@ -17,13 +16,6 @@
       text-align: center;
     }
 
-    .panel {
-      background: rgba(0,0,0,0.4);
-      margin: 20px auto;
-      padding: 20px;
-      width: 420px;
-      border-radius: 15px;
-    }
     h1 { margin-top: 20px; }
 
     button {
@@ -34,18 +26,25 @@
       margin: 5px;
     }
 
-    button:hover {
-      transform: scale(1.05);
-    }
     button:hover { transform: scale(1.05); }
 
-    #packVideo, #squishVideo {
-      width: 100%;
-      border-radius: 10px;
+    #packVideo {
       width: 300px;
       border-radius: 12px;
       display: none;
       margin: 10px auto;
+    }
+
+    #squishVideo {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 400px;
+      border-radius: 12px;
+      display: none;
+      z-index: 9999;
+      box-shadow: 0 0 30px rgba(0,0,0,0.6);
     }
 
     .cardBox {
@@ -68,60 +67,57 @@
       display: block;
     }
 
+    p, h1, h2, h3, span {
+      transition: transform 0.15s ease, text-shadow 0.15s ease;
+      display: inline-block;
+    }
+
+    p:hover, h1:hover, h2:hover, h3:hover, span:hover {
+      transform: scale(1.08);
+      text-shadow: 0 0 10px rgba(255,255,255,0.6);
+    }
+
     #shelfScroll {
       position: absolute;
       top: 20px;
       left: 20px;
       right: 20px;
       bottom: 20px;
-
       overflow-y: auto;
       max-height: 300px;
       padding: 10px;
-      margin: 10px 0;
-      border-radius: 10px;
     }
   </style>
 </head>
 
 <body>
 
+<main>
+
 <h1>brainrot pack opening simulator</h1>
 
-<p>packs opened: <span id="packs">0</span></p>
 <p>packs opened: <span id="count">0</span></p>
 <p id="timer"></p>
 
-<div class="panel">
 <button onclick="openPack()">open pack</button>
-<button onclick="claimDaily()">daily pack</button>
+<button onclick="claimDaily()">claim daily pack</button>
+<button onclick="updateUI();">show correct coin balance</button>
 
-  <button onclick="openPack()">open pack</button>
-  <button onclick="dailyPack()">daily pack</button>
 <br>
 
-  <video id="packVideo">
-    <source src="videos/opening.mp4">
-  </video>
 <video id="packVideo" controls>
   <source src="videos/opening.mp4">
 </video>
 
-  <div id="result"></div>
 <div id="result"></div>
 
-  <video id="squishVideo">
-    <source src="videos/squish.mp4">
-  </video>
-<img id="cardImg" style="max-width:200px; display:none;">
+<img id="cardImg" style="max-width:2000px; display:none;">
 
-</div>
+<p>coins: <span id="coins">60</span></p>
+
 <h2>inventory</h2>
 <div id="inventory"></div>
 
-<div class="panel">
-  <h2>inventory</h2>
-  <div id="inventory"></div>
 <h2>global shelf</h2>
 
 <div id="shelfContainer">
@@ -133,24 +129,16 @@
   <source src="videos/squish.mp4">
 </video>
 
+<div id="overlay"></div>
+
 <script>
 
-const COOLDOWN = 86400000;
-const DAILY = 24 * 60 * 60 * 1000;
+const DAILY = 11 * 60 * 60 * 1000;
 
 let packs = parseInt(localStorage.getItem("packs")) || 0;
 let inventory = JSON.parse(localStorage.getItem("inv") || "[]");
-let lastDaily = parseInt(localStorage.getItem("daily") || "0");
-
-document.getElementById("packs").innerText = packs;
-
-const cards = {
-  common: ["skibidi", "tripi tropi", "simon claw"],
-  uncommon: ["bombardino crocodilo", "tung tung tung sahur", "john pork"],
-  rare: ["ballerina cappucina", "cappucino assassino"],
-  epic: ["tralalero tralala", "67", "tim cheese"],
-  insane: ["apple pen dude"]
 let lastDaily = parseInt(localStorage.getItem("daily")) || 0;
+let coins = parseInt(localStorage.getItem("coins")) || 60;
 
 document.getElementById("count").innerText = packs;
 
@@ -159,38 +147,24 @@ const Cards = {
   insane: { "apple pen dude": "insane" },
   rare: {
     "ballerina cappucina": "rare",
-    "cappucino assassino": "rare"
+    "cappucino assassino": "rare",
+    "tim cheese": "rare"
   },
   uncommon: {
     "bombardino crocodilo": "uncommon",
-    "tung tung tung sahur": "uncommon"
+    "tung tung tung sahur": "uncommon",
+    "67": "uncommon"
   },
   common: {
     "skibidi": "common",
-    "tripi tropi": "common"
+    "tripi tropi": "common",
+    "john pork": "common"
   }
 };
 
 function randomCard() {
   let r = Math.random();
-
   let pool =
-    r < 0.03 ? cards.insane :
-    r < 0.08 ? cards.epic :
-    r < 0.18 ? cards.rare :
-    r < 0.58 ? cards.uncommon :
-    cards.common;
-
-  let name = pool[Math.floor(Math.random() * pool.length)];
-
-  let rarity =
-    cards.common.includes(name) ? "common" :
-    cards.uncommon.includes(name) ? "uncommon" :
-    cards.rare.includes(name) ? "rare" :
-    cards.epic.includes(name) ? "epic" :
-    "insane";
-
-  return { name, rarity };
     r < 0.03 ? Cards.insane :
     r < 0.08 ? Cards.epic :
     r < 0.18 ? Cards.rare :
@@ -206,20 +180,23 @@ function value(r) {
   return { common:10, uncommon:25, rare:60, epic:150, insane:500 }[r] || 10;
 }
 
+function updateUI() {
+  document.getElementById("coins").innerText = coins;
+  document.getElementById("count").innerText = packs;
+}
+
 function save() {
-  localStorage.setItem("packs", packs);
   localStorage.setItem("inv", JSON.stringify(inventory));
   localStorage.setItem("packs", packs);
   localStorage.setItem("daily", lastDaily);
+  localStorage.setItem("coins", coins);
 }
 
-function render() {
 function renderInventory() {
   let div = document.getElementById("inventory");
   div.innerHTML = "";
 
   inventory.forEach((c, i) => {
-
     let btn = `<button onclick="sell(${i})">sell</button>`;
 
     if (c.name === "tung tung tung sahur") {
@@ -237,40 +214,45 @@ function renderInventory() {
 }
 
 function sell(i) {
-  inventory.splice(i, 1);
+  coins += value(inventory[i].rarity);
   inventory.splice(i,1);
   save();
-  render();
+  updateUI();
   renderInventory();
 }
 
 function squish() {
-  let v = document.getElementById("squishVideo");
-  v.style.display = "block";
-  v.currentTime = 0;
-  v.play();
+  const video = document.getElementById("squishVideo");
+  const overlay = document.getElementById("overlay");
 
-  v.onended = () => {
-    v.style.display = "none";
+  overlay.style.display = "block";
+  video.style.display = "block";
+
+  video.currentTime = 0;
+  video.play();
+
+  video.onended = () => {
+    video.style.display = "none";
+    overlay.style.display = "none";
   };
-  v.onended = () => v.style.display = "none";
 }
 
 function openPack() {
 
-  const card = randomCard();
   let card = randomCard();
 
-  packs++;
-  document.getElementById("packs").innerText = packs;
+  if (coins < 10) {
+    alert("Not enough coins!");
+    return;
+  }
 
-  document.getElementById("count").innerText = packs;
+  coins -= 10;
+  updateUI();
+
+  packs++;
   save();
 
   let video = document.getElementById("packVideo");
-  let result = document.getElementById("result");
-
-  result.innerText = "";
   let img = document.getElementById("cardImg");
 
   video.style.display = "block";
@@ -283,10 +265,8 @@ function openPack() {
 
     inventory.push(card);
     save();
-    render();
     renderInventory();
 
-    result.innerText = `You got ${card.name} (${card.rarity})`;
     img.src = "images/" + card.name + ".png";
     img.style.display = "block";
 
@@ -295,13 +275,9 @@ function openPack() {
   };
 }
 
-function dailyPack() {
-
 function claimDaily() {
   let now = Date.now();
 
-  if (now - lastDaily < COOLDOWN) {
-    alert("Daily not ready yet!");
   if (now - lastDaily < DAILY) {
     alert("come back later");
     return;
@@ -309,53 +285,38 @@ function claimDaily() {
 
   lastDaily = now;
   save();
-
   openPack();
 }
 
 function updateTimer() {
-  let t = document.getElementById("timer");
   let el = document.getElementById("timer");
   let left = DAILY - (Date.now() - lastDaily);
 
-  let left = COOLDOWN - (Date.now() - lastDaily);
   el.innerText = left <= 0
     ? "daily ready"
     : `next daily in ${Math.floor(left/3600000)}h`;
 }
 
-  if (left <= 0) {
-    t.innerText = "Daily ready!";
-  } else {
-    let h = Math.floor(left / 3600000);
-    let m = Math.floor((left % 3600000) / 60000);
-    let s = Math.floor((left % 60000) / 1000);
 function renderShelf() {
   let div = document.getElementById("shelfScroll");
   div.innerHTML = "";
 
-    t.innerText = `Next daily: ${h}h ${m}m ${s}s`;
-  }
-  inventory.forEach((c, i) => {
-    div.innerHTML += `
-      <div class="cardBox">
-        ${c.name}
-      </div>
-    `;
+  inventory.forEach((c) => {
+    div.innerHTML += `<div class="cardBox">${c.name}</div>`;
   });
 }
 
-setInterval(updateTimer, 1000);
 setInterval(() => {
   updateTimer();
   renderShelf();
 }, 1000);
 
-render();
 renderInventory();
 renderShelf();
 
 </script>
+
+</main>
 
 </body>
 </html>
