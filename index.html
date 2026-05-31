@@ -117,54 +117,39 @@ document.getElementById("count").textContent = packsOpened;
 
 // Supabase
 const supabaseUrl = "https://istttzdbafsurjrefdwm.supabase.co";
-const supabaseKey = "YOUR_PUBLISHABLE_KEY_HERE";
+const supabaseKey = "YOUR_PUBLISHABLE_KEY"; // must be real key
 const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
 
-// Cards
-const epicCards = { "tralalero tralala": "epic" };
-
-const insaneCards = {
-  "apple pen dude": "insane"
-};
-
-const rareCards = {
-  "ballerina cappucina": "rare",
-  "cappucino assassino": "rare",
-  "67": "rare"
-};
-
-const uncommonCards = {
-  "bombardino crocodilo": "uncommon",
-  "tung tung tung sahur": "uncommon"
-};
-
-const commonCards = {
-  "tripi tropi": "common",
-  "skibidi": "common"
-};
-
-// Shelf
 async function addToShelf(card) {
-  await supabase.from("shelf").insert([
-    {
-      name: card.name,
-      rarity: card.rarity
-    }
-  ]);
-
-  loadShelf();
+  try {
+    await supabase.from("shelf").insert([
+      {
+        name: card.name,
+        rarity: card.rarity
+      }
+    ]);
+  } catch (err) {
+    console.log("Shelf insert error:", err);
+  }
 }
 
 async function loadShelf() {
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from("shelf")
     .select("*")
     .order("id", { ascending: false });
 
+  if (error) {
+    console.log("Shelf load error:", error);
+    return;
+  }
+
   const shelfDiv = document.getElementById("shelf");
+  if (!shelfDiv) return;
+
   shelfDiv.innerHTML = "";
 
-  data.forEach(item => {
+  (data || []).forEach(item => {
     shelfDiv.innerHTML += `
       <div class="cardBox">
         <h3>${item.name}</h3>
@@ -311,6 +296,7 @@ function openPack(free = false) {
 
   packsOpened++;
   document.getElementById("count").textContent = packsOpened;
+  addToShelf(card);
 
   saveGame();
 
