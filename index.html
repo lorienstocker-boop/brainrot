@@ -138,20 +138,27 @@ const commonCards = {
 
 // SAFE SHELF
 async function addToShelf(card) {
-  await supabase.from("shelf").insert([
-    { name: card.name, rarity: card.rarity }
-  ]);
+  try {
+    await supabase.from("shelf").insert([
+      { name: card.name, rarity: card.rarity }
+    ]);
+  } catch (err) {
+    console.log("Shelf insert error:", err);
+  }
 }
 
 async function loadShelf() {
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from("shelf")
     .select("*")
     .order("id", { ascending: false });
 
-  const shelfDiv = document.getElementById("shelf");
-  if (!shelfDiv) return;
+  if (error) {
+    console.log("Shelf load error:", error);
+    return;
+  }
 
+  const shelfDiv = document.getElementById("shelf");
   shelfDiv.innerHTML = "";
 
   (data || []).forEach(item => {
@@ -164,7 +171,7 @@ async function loadShelf() {
   });
 }
 
-// GAME
+// GAME SAVE
 function saveGame() {
   localStorage.setItem("inventory", JSON.stringify(inventory));
   localStorage.setItem("coins", coins);
@@ -243,6 +250,7 @@ function updateDailyTimer() {
   }
 
   const t = DAILY_COOLDOWN - (Date.now() - parseInt(last));
+
   if (t <= 0) {
     el.innerText = "daily pack: ready!";
     return;
@@ -289,9 +297,6 @@ function openPack(free = false) {
 
   saveGame();
 
-  addToShelf(card);
-  addCardToInventory(card);
-
   const video = document.getElementById("packVideo");
   const result = document.getElementById("result");
   const img = document.getElementById("cardImage");
@@ -305,8 +310,12 @@ function openPack(free = false) {
   video.currentTime = 0;
   video.play();
 
-  video.onended = () => {
+  video.onended = async () => {
+
     video.style.display = "none";
+
+    await addToShelf(card);
+    addCardToInventory(card);
 
     result.innerText = `You got ${card.name} (${card.rarity})`;
 
@@ -330,7 +339,6 @@ renderInventory();
 updateDailyTimer();
 setInterval(updateDailyTimer, 1000);
 loadShelf();
-setInterval(loadShelf, 3000);
 
 </script>
 
