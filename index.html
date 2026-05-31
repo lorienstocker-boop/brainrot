@@ -107,9 +107,10 @@
 
 <script>
 
-const supabaseUrl = "https://istttzdbafsurjrefdwm.supabase.co";
-const supabaseKey = "sb_publishable_4bjO8-2p6WIw0XxU8zDg9Q_Ydpffo8t";
-const supabase = supabase.createClient ? supabase : window.supabase.createClient(supabaseUrl, supabaseKey);
+const supabase = window.supabase.createClient(
+  "https://istttzdbafsurjrefdwm.supabase.co",
+  "sb_publishable_4bjO8-2p6WIw0XxU8zDg9Q_Ydpffo8t"
+);
 
 let packsOpened = parseInt(localStorage.getItem("packsOpened")) || 0;
 let inventory = JSON.parse(localStorage.getItem("inventory") || "[]");
