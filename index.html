@@ -5,10 +5,6 @@
   <meta charset="UTF-8" />
   <title>Brainrot Pack Simulator</title>
 
-
-  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4704601434785623"
-  crossorigin="anonymous"></script>
-
   <link rel="icon" href="meep (2).ico">
 
   <style>
@@ -32,6 +28,7 @@
 
     button:hover { transform: scale(1.05); }
 
+    #packVideo, #squishVideo {
     #packVideo {
       width: 300px;
       border-radius: 12px;
@@ -40,15 +37,15 @@
     }
 
     #squishVideo {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      width: 400px;
-      border-radius: 12px;
-      display: none;
-      z-index: 9999;
-      box-shadow: 0 0 30px rgba(0,0,0,0.6);
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 400px;
+    border-radius: 12px;
+    display: none;
+    z-index: 9999;
+    box-shadow: 0 0 30px rgba(0,0,0,0.6);
     }
 
     .cardBox {
@@ -71,58 +68,31 @@
       display: block;
     }
 
+    p, h1, h2, h3, span {
+  transition: transform 0.15s ease, text-shadow 0.15s ease;
+  display: inline-block;
+}
+
+p:hover, h1:hover, h2:hover, h3:hover, span:hover {
+  transform: scale(1.08);
+  text-shadow: 0 0 10px rgba(255,255,255,0.6);
+}
+
     #shelfScroll {
       position: absolute;
       top: 20px;
       left: 20px;
       right: 20px;
       bottom: 20px;
+
       overflow-y: auto;
       max-height: 300px;
       padding: 10px;
-    }
-
-    
-    .page {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      width: 100%;
-      min-height: 100vh;
-    }
-
-    main {
-      flex: 1;
-    }
-
-    .ad {
-      width: 160px;
-      min-width: 160px;
-      flex-shrink: 0;
-      display: block;
     }
   </style>
 </head>
 
 <body>
-
-<div class="page">
-
-  
-  <aside class="ad">
-    <ins class="adsbygoogle"
-         style="display:block"
-         data-ad-client="ca-pub-4704601434785623"
-         data-ad-slot="1678594503"
-         data-ad-format="auto"
-         data-full-width-responsive="true"></ins>
-
-    <script>
-      (adsbygoogle = window.adsbygoogle || []).push({});
-    </script>
-  </aside>
-
-<main>
 
 <h1>brainrot pack opening simulator</h1>
 
@@ -141,7 +111,7 @@
 
 <div id="result"></div>
 
-<img id="cardImg" style="max-width:2000px; display:none;">
+<img id="cardImg" style="max-width:200px; display:none;">
 
 <p>coins: <span id="coins">60</span></p>
 
@@ -159,11 +129,9 @@
   <source src="videos/squish.mp4">
 </video>
 
-<div id="overlay"></div>
-
 <script>
 
-const DAILY = 11 * 60 * 60 * 1000;
+const DAILY = 24 * 60 * 60 * 1000;
 
 let packs = parseInt(localStorage.getItem("packs")) || 0;
 let inventory = JSON.parse(localStorage.getItem("inv") || "[]");
@@ -177,18 +145,15 @@ const Cards = {
   insane: { "apple pen dude": "insane" },
   rare: {
     "ballerina cappucina": "rare",
-    "cappucino assassino": "rare",
-    "tim cheese": "rare"
+    "cappucino assassino": "rare"
   },
   uncommon: {
     "bombardino crocodilo": "uncommon",
-    "tung tung tung sahur": "uncommon",
-    "67": "uncommon"
+    "tung tung tung sahur": "uncommon"
   },
   common: {
     "skibidi": "common",
-    "tripi tropi": "common",
-    "john pork": "common"
+    "tripi tropi": "common"
   }
 };
 
@@ -252,18 +217,19 @@ function sell(i) {
 }
 
 function squish() {
-  const video = document.getElementById("squishVideo");
-  const overlay = document.getElementById("overlay");
+  let v = document.getElementById("squishVideo");
+  let o = document.getElementById("overlay");
 
-  overlay.style.display = "block";
-  video.style.display = "block";
+  o.style.display = "block";
+  v.style.display = "block";
 
-  video.currentTime = 0;
-  video.play();
+  v.currentTime = 0;
+  v.play();
 
-  video.onended = () => {
-    video.style.display = "none";
-    overlay.style.display = "none";
+  v.onended = () => v.style.display = "none";
+  v.onended = () => {
+    v.style.display = "none";
+    o.style.display = "none";
   };
 }
 
@@ -277,9 +243,12 @@ function openPack() {
   }
 
   coins -= 10;
+  document.getElementById("coins").innerText = coins;
   updateUI();
 
+
   packs++;
+  document.getElementById("count").innerText = packs;
   save();
 
   let video = document.getElementById("packVideo");
@@ -331,8 +300,12 @@ function renderShelf() {
   let div = document.getElementById("shelfScroll");
   div.innerHTML = "";
 
-  inventory.forEach((c) => {
-    div.innerHTML += `<div class="cardBox">${c.name}</div>`;
+  inventory.forEach((c, i) => {
+    div.innerHTML += `
+      <div class="cardBox">
+        ${c.name}
+      </div>
+    `;
   });
 }
 
@@ -345,24 +318,6 @@ renderInventory();
 renderShelf();
 
 </script>
-
-</main>
-
- 
-  <aside class="ad">
-    <ins class="adsbygoogle"
-         style="display:block"
-         data-ad-client="ca-pub-4704601434785623"
-         data-ad-slot=" 8403254723"
-         data-ad-format="auto"
-         data-full-width-responsive="true"></ins>
-
-    <script>
-      (adsbygoogle = window.adsbygoogle || []).push({});
-    </script>
-  </aside>
-
-</div>
 
 </body>
 </html>
