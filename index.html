@@ -413,6 +413,8 @@ function claimDailyPack() {
   localStorage.setItem("dailyClaim", Date.now());
 
   alert("You claimed your daily pack!");
+  
+  openPack();
 
   updateDailyTimer();
 }
