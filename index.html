@@ -180,20 +180,24 @@ function renderInventory() {
   inventory.forEach((card, index) => {
     const isTung = card.name === "tung tung tung sahur";
 
+    let buttons = `<button onclick="sellCard(${index})">Sell</button>`;
+
+    if (isTung) {
+      buttons += `<button onclick="squishCard()">Squish</button>`;
+    }
+
     div.innerHTML += `
       <div class="cardBox">
         <h3>${card.name}</h3>
         <p>Rarity: ${card.rarity}</p>
         <p>Value: ${getCardValue(card.rarity)}</p>
-
-        <button onclick="sellCard(${index})">Sell</button>
-        ${isTung ? `<button onclick="squishCard()">squish :3</button>` : ""}
+        ${buttons}
       </div>
     `;
   });
 
   if (inventory.length === 0) {
-    div.innerHTML += `<p>no cards yet</p>`;
+    div.innerHTML += `<p>No cards yet.</p>`;
   }
 }
 
