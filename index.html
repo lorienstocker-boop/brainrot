@@ -99,6 +99,8 @@ p:hover, h1:hover, h2:hover, h3:hover, span:hover {
 
 <img id="cardImg" style="max-width:200px; display:none;">
 
+<p>coins: <span id="coins">60</span></p>
+
 <h2>inventory</h2>
 <div id="inventory"></div>
 
@@ -120,6 +122,7 @@ const DAILY = 24 * 60 * 60 * 1000;
 let packs = parseInt(localStorage.getItem("packs")) || 0;
 let inventory = JSON.parse(localStorage.getItem("inv") || "[]");
 let lastDaily = parseInt(localStorage.getItem("daily")) || 0;
+let coins = parseInt(localStorage.getItem("coins")) || 60;
 
 document.getElementById("count").innerText = packs;
 
@@ -162,6 +165,7 @@ function save() {
   localStorage.setItem("inv", JSON.stringify(inventory));
   localStorage.setItem("packs", packs);
   localStorage.setItem("daily", lastDaily);
+  localStorage.setItem("coins", coins);
 }
 
 function renderInventory() {
@@ -203,6 +207,17 @@ function squish() {
 function openPack() {
 
   let card = randomCard();
+
+  function openPack() {
+
+  if (coins < 10) {
+    alert("Not enough coins!");
+    return;
+  }
+
+  coins -= 10;
+  document.getElementById("coins").innerText = coins;
+
 
   packs++;
   document.getElementById("count").innerText = packs;
