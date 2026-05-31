@@ -85,7 +85,7 @@
   <p id="dailyTimer"></p>
 
   <h2>Global Shelf</h2>
-  <button onclick="loadShelf()">refresh shelf</button>
+  <button onclick="loadShelf()">Refresh Shelf</button>
   <div id="shelf"></div>
 
   <video id="packVideo" width="500" style="display:none;">
@@ -102,7 +102,7 @@
   <img id="cardImage" src="" style="display:none;">
 
   <div id="inventory">
-    <h2>inventory</h2>
+    <h2>Inventory</h2>
   </div>
 
 <script>
@@ -115,12 +115,12 @@ let coins = parseInt(localStorage.getItem("coins")) || 60;
 
 document.getElementById("count").textContent = packsOpened;
 
-
+// Supabase
 const supabaseUrl = "https://istttzdbafsurjrefdwm.supabase.co";
-const supabaseKey = "sb_publishable_4bjO8-2p6WIw0XxU8zDg9Q_Ydpffo8t";
+const supabaseKey = "YOUR_PUBLISHABLE_KEY_HERE";
 const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
 
-
+// Cards
 const epicCards = { "tralalero tralala": "epic" };
 
 const insaneCards = {
@@ -143,7 +143,7 @@ const commonCards = {
   "skibidi": "common"
 };
 
-
+// Shelf
 async function addToShelf(card) {
   await supabase.from("shelf").insert([
     {
@@ -174,7 +174,7 @@ async function loadShelf() {
   });
 }
 
-
+// Game logic
 function saveGame() {
   localStorage.setItem("inventory", JSON.stringify(inventory));
   localStorage.setItem("coins", coins);
@@ -254,7 +254,7 @@ function renderInventory() {
   }
 }
 
-
+// Daily
 function canClaimDaily() {
   const last = localStorage.getItem("lastDailyPack");
   if (!last) return true;
@@ -279,7 +279,7 @@ function updateDailyTimer() {
   const timeLeft = DAILY_COOLDOWN - (Date.now() - parseInt(last));
 
   if (timeLeft <= 0) {
-    timer.innerText = "daily pack: ready :3";
+    timer.innerText = "daily pack: ready!";
     return;
   }
 
@@ -290,7 +290,7 @@ function updateDailyTimer() {
   timer.innerText = `next daily pack in ${h}h ${m}m ${s}s`;
 }
 
-
+// PACK OPENING
 function openPack(free = false) {
 
   if (!free) {
@@ -352,7 +352,7 @@ function openPack(free = false) {
   };
 }
 
-
+// init
 renderInventory();
 updateDailyTimer();
 setInterval(updateDailyTimer, 1000);
