@@ -5,6 +5,8 @@
   <link rel="icon" href="meep (2).ico">
   <title>brainrot booster pack opening simulation</title>
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -13,8 +15,6 @@
       color: white;
       padding: 30px;
     }
-
-    
 
     #packVideo, #squishVideo {
       transition: transform 0.2s;
@@ -63,17 +63,14 @@
     }
 
     p, h1, h2, h3, span {
-  transition: transform 0.15s ease, text-shadow 0.15s ease;
-  display: inline-block;
-}
+      transition: transform 0.15s ease, text-shadow 0.15s ease;
+      display: inline-block;
+    }
 
-p:hover, h1:hover, h2:hover, h3:hover, span:hover {
-  transform: scale(1.08);
-  text-shadow: 0 0 10px rgba(255,255,255,0.6);
-}
-
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    
+    p:hover, h1:hover, h2:hover, h3:hover, span:hover {
+      transform: scale(1.08);
+      text-shadow: 0 0 10px rgba(255,255,255,0.6);
+    }
   </style>
 </head>
 
@@ -88,7 +85,7 @@ p:hover, h1:hover, h2:hover, h3:hover, span:hover {
   <p id="dailyTimer"></p>
 
   <h2>Global Shelf</h2>
-  <button onclick="loadShelf()">Refresh Shelf</button>
+  <button onclick="loadShelf()">refresh shelf</button>
   <div id="shelf"></div>
 
   <video id="packVideo" width="500" style="display:none;">
@@ -105,12 +102,10 @@ p:hover, h1:hover, h2:hover, h3:hover, span:hover {
   <img id="cardImage" src="" style="display:none;">
 
   <div id="inventory">
-    <h2>Inventory</h2>
+    <h2>inventory</h2>
   </div>
 
 <script>
-
-  
 
 const DAILY_COOLDOWN = 24 * 60 * 60 * 1000;
 
@@ -119,6 +114,12 @@ let inventory = JSON.parse(localStorage.getItem("inventory") || "[]");
 let coins = parseInt(localStorage.getItem("coins")) || 60;
 
 document.getElementById("count").textContent = packsOpened;
+
+
+const supabaseUrl = "https://istttzdbafsurjrefdwm.supabase.co";
+const supabaseKey = "sb_publishable_4bjO8-2p6WIw0XxU8zDg9Q_Ydpffo8t";
+const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+
 
 const epicCards = { "tralalero tralala": "epic" };
 
@@ -142,13 +143,8 @@ const commonCards = {
   "skibidi": "common"
 };
 
-  const supabaseUrl = "https://istttzdbafsurjrefdwm.supabase.co";
-const supabaseKey = "sb_publishable_4bjO8-2p6WIw0XxU8zDg9Q_Ydpffo8t";
 
-const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
-
-
-  async function addToShelf(card) {
+async function addToShelf(card) {
   await supabase.from("shelf").insert([
     {
       name: card.name,
@@ -159,8 +155,8 @@ const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
   loadShelf();
 }
 
-  async function loadShelf() {
-  const { data, error } = await supabase
+async function loadShelf() {
+  const { data } = await supabase
     .from("shelf")
     .select("*")
     .order("id", { ascending: false });
@@ -177,6 +173,7 @@ const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
     `;
   });
 }
+
 
 function saveGame() {
   localStorage.setItem("inventory", JSON.stringify(inventory));
@@ -198,7 +195,6 @@ function getCardValue(rarity) {
     epic: 150,
     insane: 500
   };
-
   return values[rarity] ?? 10;
 }
 
@@ -217,12 +213,11 @@ function sellCard(index) {
 
 function squishCard() {
   const video = document.getElementById("squishVideo");
-
   video.style.display = "block";
   video.currentTime = 0;
   video.play();
 
-  video.onended = function () {
+  video.onended = () => {
     video.style.display = "none";
   };
 }
@@ -247,7 +242,7 @@ function renderInventory() {
     div.innerHTML += `
       <div class="cardBox">
         <h3>${card.name}</h3>
-        <p>Rarity: ${card.rarity}</p>
+        <p>${card.rarity}</p>
         <p>Value: ${getCardValue(card.rarity)}</p>
         ${buttons}
       </div>
@@ -259,6 +254,7 @@ function renderInventory() {
   }
 }
 
+
 function canClaimDaily() {
   const last = localStorage.getItem("lastDailyPack");
   if (!last) return true;
@@ -266,19 +262,13 @@ function canClaimDaily() {
 }
 
 function claimDailyPack() {
-  if (!canClaimDaily()) {
-    alert("Come back later!");
-    return;
-  }
-
+  if (!canClaimDaily()) return alert("Come back later!");
   localStorage.setItem("lastDailyPack", Date.now());
   openPack(true);
 }
 
 function updateDailyTimer() {
   const timer = document.getElementById("dailyTimer");
-  if (!timer) return;
-
   const last = localStorage.getItem("lastDailyPack");
 
   if (!last) {
@@ -289,16 +279,17 @@ function updateDailyTimer() {
   const timeLeft = DAILY_COOLDOWN - (Date.now() - parseInt(last));
 
   if (timeLeft <= 0) {
-    timer.innerText = "daily pack: ready!";
+    timer.innerText = "daily pack: ready :3";
     return;
   }
 
-  const hours = Math.floor(timeLeft / (1000 * 60 * 60));
-  const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
-  const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+  const h = Math.floor(timeLeft / 3600000);
+  const m = Math.floor((timeLeft % 3600000) / 60000);
+  const s = Math.floor((timeLeft % 60000) / 1000);
 
-  timer.innerText = `next daily pack in ${hours}h ${minutes}m ${seconds}s`;
+  timer.innerText = `next daily pack in ${h}h ${m}m ${s}s`;
 }
+
 
 function openPack(free = false) {
 
@@ -323,7 +314,7 @@ function openPack(free = false) {
 
   saveGame();
 
-  addToShelf(card); 
+  addToShelf(card);
 
   const video = document.getElementById("packVideo");
   const result = document.getElementById("result");
@@ -366,10 +357,10 @@ renderInventory();
 updateDailyTimer();
 setInterval(updateDailyTimer, 1000);
 
-</script>
+loadShelf();
+setInterval(loadShelf, 3000);
 
-</body>
-</html>
+</script>
 
 </body>
 </html>
