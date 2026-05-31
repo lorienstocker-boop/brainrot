@@ -1,131 +1,42 @@
-<!DOCTYPE html>
-<html>
-
-<head>
-  <link rel="icon" href="meep (2).ico">
-  <title>brainrot booster pack opening simulation</title>
-
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      text-align: center;
-      background: linear-gradient(90deg, #FFD014, #805280);
-      color: white;
-      padding: 30px;
-    }
-
-    #packVideo, #squishVideo {
-      transition: transform 0.2s;
-    }
-
-    #packVideo:hover {
-      transform: scale(1.1);
-    }
-
-    button {
-      font-size: 18px;
-      padding: 10px 20px;
-      cursor: pointer;
-      border-radius: 10px;
-      border: none;
-      margin-top: 10px;
-      transition: transform 0.2s;
-    }
-
-    button:hover {
-      transform: scale(1.05);
-    }
-
-    img {
-      margin-top: 20px;
-      max-width: 300px;
-      border-radius: 12px;
-    }
-
-    #result {
-      font-size: 24px;
-      margin-top: 25px;
-    }
-
-    #inventory {
-      margin-top: 40px;
-    }
-
-    .cardBox {
-      background: #222;
-      border: 2px solid white;
-      border-radius: 15px;
-      padding: 15px;
-      margin: 15px auto;
-      width: 350px;
-    }
-  </style>
-</head>
-
-<body>
-
-  <h1>brainrot booster pack opening simulation</h1>
-
-  <button onclick="openPack()">open pack</button>
-  <button onclick="claimDailyPack()">Free Daily Pack!!! :3</button>
-
-  <p>Total Packs Opened: <span id="count">0</span></p>
-
-  <video id="packVideo" width="500" style="display:none;">
-    <source src="videos/opening.mp4" type="video/mp4">
-  </video>
-
-  <video id="squishVideo" width="500" style="display:none;">
-    <source src="videos/squish.mp4" type="video/mp4">
-  </video>
-
-  <div id="result"></div>
-  <div id="outcome"></div>
-
-  <img id="cardImage" src="" style="display:none;">
-
-  <div id="inventory">
-    <h2>Inventory</h2>
-  </div>
-
 <script>
 
 const DAILY_COOLDOWN = 24 * 60 * 60 * 1000;
 
+
+
 let packsOpened = parseInt(localStorage.getItem("packsOpened")) || 0;
-let inventory = JSON.parse(localStorage.getItem("inventory")) || [];
+let inventory = JSON.parse(localStorage.getItem("inventory") || "[]");
 let coins = parseInt(localStorage.getItem("coins")) || 60;
 
 document.getElementById("count").textContent = packsOpened;
 
-const epicCards = {
-  "tralalero tralala": "epic"
-};
 
+
+const epicCards = { "tralalero tralala": "epic" };
 const insaneCards = {
   "tung tung tung sahur": "insane",
   "apple pen dude": "insane"
 };
-
 const rareCards = {
   "ballerina cappucina": "rare",
   "cappucino assassino": "rare"
 };
-
 const uncommonCards = {
   "bombardino crocodilo": "uncommon"
 };
-
 const commonCards = {
   "tripi tropi": "common",
   "skibidi": "common"
 };
+
+
 
 function saveGame() {
   localStorage.setItem("inventory", JSON.stringify(inventory));
   localStorage.setItem("coins", coins);
   localStorage.setItem("packsOpened", packsOpened);
 }
+
 
 function chooseRandomCard(cards) {
   const keys = Object.keys(cards);
@@ -146,6 +57,7 @@ function getCardValue(rarity) {
   return 0;
 }
 
+
 function addCardToInventory(card) {
   inventory.push(card);
   saveGame();
@@ -158,6 +70,7 @@ function sellCard(index) {
   saveGame();
   renderInventory();
 }
+
 
 function squishCard() {
   const video = document.getElementById("squishVideo");
@@ -180,7 +93,7 @@ function renderInventory() {
   `;
 
   inventory.forEach((card, index) => {
-    const isTungSahur = card.name === "tung tung tung sahur";
+    const isTung = card.name === "tung tung tung sahur";
 
     div.innerHTML += `
       <div class="cardBox">
@@ -188,16 +101,18 @@ function renderInventory() {
         <p>Rarity: ${card.rarity}</p>
         <p>Value: ${getCardValue(card.rarity)}</p>
 
-        <button onclick="sellCard(${index})">Sell</button>
-        ${isTungSahur ? `<button onclick="squishCard()">squish :3</button>` : ""}
+        <button onclick="sellCard(${index})">sell</button>
+        ${isTung ? `<button onclick="squishCard()">Squish</button>` : ""}
       </div>
     `;
   });
 
   if (inventory.length === 0) {
-    div.innerHTML += `<p>No cards yet.</p>`;
+    div.innerHTML += `<p>no cards yet</p>`;
   }
 }
+
+
 
 function canClaimDaily() {
   const last = localStorage.getItem("lastDailyPack");
@@ -207,7 +122,7 @@ function canClaimDaily() {
 
 function claimDailyPack() {
   if (!canClaimDaily()) {
-    alert("come back later for your free pack!");
+    alert("Come back later!");
     return;
   }
 
@@ -215,20 +130,19 @@ function claimDailyPack() {
   openPack(true);
 }
 
+
+
 function openPack(free = false) {
 
   if (!free) {
-    if (coins < 20) {
-      alert("not enough coins :(");
-      return;
-    }
+    if (coins < 20) return alert("not enough coins :(");
     coins -= 20;
   }
 
   packsOpened++;
   document.getElementById("count").textContent = packsOpened;
+
   saveGame();
-  renderInventory();
 
   const roll = Math.random();
   let cards;
@@ -265,27 +179,21 @@ function openPack(free = false) {
 
     const value = getCardValue(card.rarity);
 
-    if (value >= 500) {
-      outcome.innerText = "SUPER WIN!!!!!!";
-      outcome.style.color = "gold";
-    } else if (value < 20) {
-      outcome.innerText = "LOSE";
-      outcome.style.color = "red";
-    } else {
-      outcome.innerText = "WIN!";
-      outcome.style.color = "lime";
-    }
+    outcome.innerText =
+      value >= 500 ? "SUPER WIN!!!!!!" :
+      value < 20 ? "LOSE" : "WIN!";
+
+    outcome.style.color =
+      value >= 500 ? "gold" :
+      value < 20 ? "red" : "lime";
 
     addCardToInventory(card);
   };
 }
 
+
+
+renderInventory();
+
 </script>
-
-</body>
-</html>
-
-</script>
-
-</body>
 </html>
