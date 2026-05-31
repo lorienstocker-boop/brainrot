@@ -72,13 +72,12 @@
 <body>
 
 <h1>brainrot pack opening simulator</h1>
-  
-<p>coins: <span id="coins">60</span></p>
+
 <p>packs opened: <span id="count">0</span></p>
 <p id="timer"></p>
 
-<button onclick="openPack()">Open Pack</button>
-<button onclick="claimDaily()">Daily Pack</button>
+<button onclick="openPack()">open pack</button>
+<button onclick="claimDaily()">claim daily pack</button>
 
 <br>
 
@@ -93,7 +92,7 @@
 <h2>inventory</h2>
 <div id="inventory"></div>
 
-<h2>global shelf</h2>
+<h2>Global Shelf</h2>
 
 <div id="shelfContainer">
   <img id="shelfImg" src="images/shelf.png">
@@ -111,19 +110,15 @@ const DAILY = 24 * 60 * 60 * 1000;
 let packs = parseInt(localStorage.getItem("packs")) || 0;
 let inventory = JSON.parse(localStorage.getItem("inv") || "[]");
 let lastDaily = parseInt(localStorage.getItem("daily")) || 0;
-let coins = parseInt(localStorage.getItem("coins")) || 60;
 
 document.getElementById("count").innerText = packs;
 
 const Cards = {
-  epic: { "tralalero tralala": "epic",
-         "tim cheese": "epic"
-        },
+  epic: { "tralalero tralala": "epic" },
   insane: { "apple pen dude": "insane" },
   rare: {
     "ballerina cappucina": "rare",
-    "cappucino assassino": "rare",
-    "67": "rare"
+    "cappucino assassino": "rare"
   },
   uncommon: {
     "bombardino crocodilo": "uncommon",
@@ -131,8 +126,7 @@ const Cards = {
   },
   common: {
     "skibidi": "common",
-    "tripi tropi": "common",
-    "john pork": "common"
+    "tripi tropi": "common"
   }
 };
 
@@ -158,7 +152,6 @@ function save() {
   localStorage.setItem("inv", JSON.stringify(inventory));
   localStorage.setItem("packs", packs);
   localStorage.setItem("daily", lastDaily);
-  localStorage.setItem("coins", coins);
 }
 
 function renderInventory() {
@@ -201,16 +194,6 @@ function openPack() {
 
   let card = randomCard();
 
-  if (coins < 10) {
-    alert("Not enough coins!");
-    return;
-  }
-
-  coins -= 10;
-
-  }
-
-
   packs++;
   document.getElementById("count").innerText = packs;
   save();
@@ -235,8 +218,6 @@ function openPack() {
 
     document.getElementById("result").innerText =
       `You got ${card.name} (${card.rarity})`;
-
-    coins -= 10;
   };
 }
 
@@ -274,9 +255,6 @@ function renderShelf() {
     `;
   });
 }
-  
-
-document.getElementById("coins").innerText = coins;
 
 setInterval(() => {
   updateTimer();
