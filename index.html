@@ -133,12 +133,15 @@ function chooseRandomCard(cards) {
 }
 
 function getCardValue(rarity) {
-  if (rarity === "common") return 10;
-  if (rarity === "uncommon") return 25;
-  if (rarity === "rare") return 60;
-  if (rarity === "epic") return 150;
-  if (rarity === "insane") return 500;
-  return 0;
+  const values = {
+    common: 10,
+    uncommon: 25,
+    rare: 60,
+    epic: 150,
+    insane: 500
+  };
+
+  return values[rarity] ?? 10;
 }
 
 function addCardToInventory(card) {
