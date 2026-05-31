@@ -307,12 +307,6 @@ function openPack(free = false) {
     coins -= 20;
   }
 
-  packsOpened++;
-  document.getElementById("count").textContent = packsOpened;
-  addToShelf(card);
-
-  saveGame();
-
   const roll = Math.random();
   let cards;
 
@@ -324,15 +318,17 @@ function openPack(free = false) {
 
   const card = chooseRandomCard(cards);
 
+  packsOpened++;
+  document.getElementById("count").textContent = packsOpened;
+
+  saveGame();
+
+  addToShelf(card); 
+
   const video = document.getElementById("packVideo");
   const result = document.getElementById("result");
   const image = document.getElementById("cardImage");
   const outcome = document.getElementById("outcome");
-
-  setInterval(loadShelf, 3000);
-  loadShelf();
-
-
 
   result.innerText = "";
   outcome.innerText = "";
@@ -364,6 +360,7 @@ function openPack(free = false) {
     addCardToInventory(card);
   };
 }
+
 
 renderInventory();
 updateDailyTimer();
