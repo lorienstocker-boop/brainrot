@@ -69,6 +69,8 @@
   <button onclick="openPack()">Open Pack</button>
   <button onclick="claimDailyPack()">Free Daily Pack!!! :3</button>
 
+  <p id="dailyTimer">daily pack: ready!</p>
+
   <p>total packs opened: <span id="count">0</span></p>
 
   <video id="packVideo" width="500" style="display:none;">
@@ -118,6 +120,31 @@ const commonCards = {
   "tripi tropi": "common",
   "skibidi": "common"
 };
+
+  const DAILY_COOLDOWN = 24 * 60 * 60 * 1000;
+
+function updateDailyTimer() {
+  const last = localStorage.getItem("lastDailyPack");
+  const timer = document.getElementById("dailyTimer");
+
+  if (!last) {
+    timer.innerText = "Daily Pack: ready!";
+    return;
+  }
+
+  const timeLeft = DAILY_COOLDOWN - (Date.now() - parseInt(last));
+
+  if (timeLeft <= 0) {
+    timer.innerText = "Daily Pack: ready!";
+    return;
+  }
+
+  const hours = Math.floor(timeLeft / (1000 * 60 * 60));
+  const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+  const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+
+  timer.innerText = `Next Daily Pack in ${hours}h ${minutes}m ${seconds}s`;
+}
 
 function saveGame() {
   localStorage.setItem("inventory", JSON.stringify(inventory));
@@ -265,10 +292,14 @@ function openPack(free = false) {
       value < 20 ? "red" : "lime";
 
     addCardToInventory(card);
+
+    
   };
 }
 
 renderInventory();
+setInterval(updateDailyTimer, 1000);
+updateDailyTimer();
 
 </script>
 
