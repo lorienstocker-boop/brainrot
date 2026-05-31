@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="UTF-8" />
-  <title>Brainrot Pack Simulator</title>
+  <title>brainrot pack simulator</title>
 
   <link rel="icon" href="meep (2).ico">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -68,6 +68,7 @@
     #shelfContainer {
       position: relative;
       width: 700px;
+      height: 500px;
       margin: 20px auto;
     }
 
@@ -81,6 +82,7 @@
       top: 0;
       left: 0;
       width: 100%;
+      height: 100%;
     }
   </style>
 </head>
@@ -95,11 +97,10 @@
 
 <div class="main">
 
-
   <div class="panel">
     <h2>brainrot pack opening simulator</h2>
 
-    <button onclick="Game.openPack()">open 1 pack</button>
+    <button onclick="openPack()">open 1 pack</button>
     <button onclick="openDaily()">free daily pack</button>
 
     <video id="packVideo" style="display:none;">
@@ -107,9 +108,9 @@
     </video>
 
     <div id="result"></div>
+
     <img id="cardImg" style="display:none; max-width:250px;">
   </div>
-
 
   <div class="panel">
     <h2>inventory</h2>
@@ -118,12 +119,10 @@
 
 </div>
 
-
-<div class="panel" style="width: 700px; margin: auto;">
+<div class="panel" style="width:700px; margin:auto;">
   <h2>global shelf</h2>
-  <button onclick="Shelf.load()">refresh shelf</button>
 
-  <div id="shelf"></div>
+  <button onclick="loadShelf()">refresh shelf</button>
 
   <div id="shelfContainer">
     <img src="images/shelf.png" id="shelfImg">
@@ -131,46 +130,58 @@
   </div>
 </div>
 
-
 <video id="squishVideo" style="display:none;">
   <source src="videos/squish.mp4">
 </video>
 
 <script>
 
-
-const supabase = window.supabase.createClient(
+const supabaseClient = window.supabase.createClient(
   "https://istttzdbafsurjrefdwm.supabase.co",
   "sb_publishable_4bjO8-2p6WIw0XxU8zDg9Q_Ydpffo8t"
 );
 
-
 let packs = parseInt(localStorage.getItem("packs")) || 0;
-let coins = 60;
+let coins = parseInt(localStorage.getItem("coins")) || 60;
 let inventory = JSON.parse(localStorage.getItem("inv") || "[]");
 
 document.getElementById("packs").innerText = packs;
 
-
 const Cards = {
-  epic: { "tralalero tralala": "epic" },
-  insane: { "apple pen dude": "insane" },
+  epic: {
+    "tralalero tralala": "epic"
+  },
+
+  insane: {
+    "apple pen dude": "insane"
+  },
+
   rare: {
     "ballerina cappucina": "rare",
     "cappucino assassino": "rare"
   },
+
   uncommon: {
     "bombardino crocodilo": "uncommon",
     "tung tung tung sahur": "uncommon"
   },
+
   common: {
     "skibidi": "common",
     "tripi tropi": "common"
   }
 };
 
+function save() {
+  localStorage.setItem("packs", packs);
+  localStorage.setItem("coins", coins);
+  localStorage.setItem("inv", JSON.stringify(inventory));
+}
+
 function randomCard() {
-  let roll = Math.random();
+
+  const roll = Math.random();
+
   let pool =
     roll < 0.03 ? Cards.insane :
     roll < 0.08 ? Cards.epic :
@@ -178,80 +189,124 @@ function randomCard() {
     roll < 0.58 ? Cards.uncommon :
     Cards.common;
 
-  let keys = Object.keys(pool);
-  let name = keys[Math.floor(Math.random() * keys.length)];
-  return { name, rarity: pool[name] };
+  const keys = Object.keys(pool);
+
+  const name =
+    keys[Math.floor(Math.random() * keys.length)];
+
+  return {
+    name,
+    rarity: pool[name]
+  };
 }
 
-function value(r) {
-  return { common:10, uncommon:25, rare:60, epic:150, insane:500 }[r];
-}
+function value(rarity) {
 
-  function openDaily() {
-  openPack();
+  return {
+    common: 10,
+    uncommon: 25,
+    rare: 60,
+    epic: 150,
+    insane: 500
+  }[rarity] || 10;
 }
-
 
 function renderInventory() {
+
   const div = document.getElementById("inventory");
-  div.innerHTML = "";
 
-  inventory.forEach((c, i) => {
-    let btn = `<button onclick="sell(${i})">sell</button>`;
+  div.innerHTML = `
+    <p>coins: ${coins}</p>
+  `;
 
-    if (c.name === "tung tung tung sahur") {
-      btn += `<button onclick="squish()">squish</button>`;
+  inventory.forEach((card, i) => {
+
+    let buttons =
+      `<button onclick="sell(${i})">sell</button>`;
+
+    if (card.name === "tung tung tung sahur") {
+
+      buttons +=
+        `<button onclick="squish()">squish</button>`;
     }
 
     div.innerHTML += `
       <div class="cardBox">
-        <b>${c.name}</b><br>
-        ${c.rarity}<br>
-        ${btn}
+        <b>${card.name}</b><br>
+        ${card.rarity}<br><br>
+        ${buttons}
       </div>
     `;
   });
 }
 
 function sell(i) {
+
   coins += value(inventory[i].rarity);
-  inventory.splice(i,1);
+
+  inventory.splice(i, 1);
+
   save();
+
   renderInventory();
 }
 
-
 function squish() {
-  const v = document.getElementById("squishVideo");
-  v.style.display = "block";
-  v.currentTime = 0;
-  v.play();
-  v.onended = () => v.style.display = "none";
+
+  const video =
+    document.getElementById("squishVideo");
+
+  video.style.display = "block";
+
+  video.currentTime = 0;
+
+  video.play();
+
+  video.onended = () => {
+
+    video.style.display = "none";
+  };
 }
 
-
 async function addToShelf(card) {
-  await supabase.from("shelf").insert([card]);
+
+  await supabaseClient
+    .from("shelf")
+    .insert([card]);
 }
 
 async function loadShelf() {
-  const { data } = await supabase.from("shelf").select("*");
 
-  const div = document.getElementById("shelfItems");
+  const { data, error } =
+    await supabaseClient
+      .from("shelf")
+      .select("*")
+      .order("id", { ascending: false });
+
+  if (error) {
+    console.log(error);
+    return;
+  }
+
+  const div =
+    document.getElementById("shelfItems");
+
   div.innerHTML = "";
 
   (data || []).forEach((item, i) => {
+
     div.innerHTML += `
       <div style="
         position:absolute;
-        left:${(i%5)*120}px;
-        top:${Math.floor(i/5)*140}px;
-        width:100px;
+        left:${(i % 5) * 120 + 40}px;
+        top:${Math.floor(i / 5) * 145 + 40}px;
+        width:90px;
         background:#222;
         border:2px solid white;
         border-radius:10px;
         padding:5px;
         font-size:12px;
+        text-align:center;
       ">
         ${item.name}
       </div>
@@ -259,41 +314,67 @@ async function loadShelf() {
   });
 }
 
+function openDaily() {
+  openPack(true);
+}
 
-function openPack() {
+function openPack(free = false) {
 
   const card = randomCard();
 
   packs++;
-  localStorage.setItem("packs", packs);
+
   document.getElementById("packs").innerText = packs;
 
-  const video = document.getElementById("packVideo");
+  save();
+
+  const video =
+    document.getElementById("packVideo");
+
+  const result =
+    document.getElementById("result");
+
+  const img =
+    document.getElementById("cardImg");
+
+  result.innerText = "";
+
+  img.style.display = "none";
 
   video.style.display = "block";
+
   video.currentTime = 0;
+
   video.play();
 
-  video.onended = () => {
+  video.onended = async () => {
 
     video.style.display = "none";
 
     inventory.push(card);
 
-    localStorage.setItem("inv", JSON.stringify(inventory));
+    save();
 
     renderInventory();
 
-    addToShelf(card);
+    await addToShelf(card);
 
-    document.getElementById("result").innerText =
+    loadShelf();
+
+    result.innerText =
       `You got ${card.name} (${card.rarity})`;
+
+    img.src =
+      `images/${card.name}.png`;
+
+    img.style.display = "block";
   };
 }
 
-
 renderInventory();
+
 loadShelf();
+
 setInterval(loadShelf, 4000);
 
 </script>
