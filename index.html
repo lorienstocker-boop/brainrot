@@ -71,16 +71,6 @@
       display: block;
     }
 
-    p, h1, h2, h3, span {
-      transition: transform 0.15s ease, text-shadow 0.15s ease;
-      display: inline-block;
-    }
-
-    p:hover, h1:hover, h2:hover, h3:hover, span:hover {
-      transform: scale(1.08);
-      text-shadow: 0 0 10px rgba(255,255,255,0.6);
-    }
-
     #shelfScroll {
       position: absolute;
       top: 20px;
@@ -92,32 +82,20 @@
       padding: 10px;
     }
 
-    
-   .page {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  width: 100%;
-  min-height: 100vh;
-}
+    .page {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
 
-main {
-  flex: 1;
-  max-width: 100%;
-}
+    main {
+      flex: 1;
+    }
 
-.ad {
-  width: 160px;
-  min-height: 600px;
-  display: block;
-}
-
-
-.ad-right {
-  position: sticky;
-  top: 10px;
-}
-    
+    .ad {
+      width: 160px;
+      min-height: 600px;
+    }
   </style>
 </head>
 
@@ -125,10 +103,18 @@ main {
 
 <div class="page">
 
-
+  <aside class="ad">
+    <ins class="adsbygoogle"
+         style="display:block"
+         data-ad-client="ca-pub-4704601434785623"
+         data-ad-slot="1678594503"
+         data-ad-format="auto"
+         data-full-width-responsive="true"></ins>
 
     <script>
-      (adsbygoogle = window.adsbygoogle || []).push({});
+      try {
+        (adsbygoogle = window.adsbygoogle || []).push({});
+      } catch(e) {}
     </script>
   </aside>
 
@@ -268,12 +254,6 @@ function squish() {
   overlay.style.display = "block";
   video.style.display = "block";
 
-  video.style.position = "fixed";
-  video.style.top = "50%";
-  video.style.left = "50%";
-  video.style.transform = "translate(-50%, -50%)";
-  video.style.zIndex = "9999";
-
   video.currentTime = 0;
   video.play();
 
@@ -348,11 +328,7 @@ function renderShelf() {
   div.innerHTML = "";
 
   inventory.forEach((c) => {
-    div.innerHTML += `
-      <div class="cardBox">
-        ${c.name}
-      </div>
-    `;
+    div.innerHTML += `<div class="cardBox">${c.name}</div>`;
   });
 }
 
@@ -368,17 +344,19 @@ renderShelf();
 
 </main>
 
-
-  <aside class="ad ad-right">
+ 
+  <aside class="ad">
     <ins class="adsbygoogle"
          style="display:block"
          data-ad-client="ca-pub-4704601434785623"
-         data-ad-slot="1678594503"
+         data-ad-slot="YOUR_SECOND_AD_SLOT"
          data-ad-format="auto"
          data-full-width-responsive="true"></ins>
 
     <script>
-      (adsbygoogle = window.adsbygoogle || []).push({});
+      try {
+        (adsbygoogle = window.adsbygoogle || []).push({});
+      } catch(e) {}
     </script>
   </aside>
 
