@@ -28,11 +28,23 @@
 
     button:hover { transform: scale(1.05); }
 
-    #packVideo, #squishVideo {
+    #packVideo {
       width: 300px;
       border-radius: 12px;
       display: none;
       margin: 10px auto;
+    }
+
+    #squishVideo {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 400px;
+    border-radius: 12px;
+    display: none;
+    z-index: 9999;
+    box-shadow: 0 0 30px rgba(0,0,0,0.6);
     }
 
     .cardBox {
@@ -205,11 +217,18 @@ function sell(i) {
 
 function squish() {
   let v = document.getElementById("squishVideo");
+  let o = document.getElementById("overlay");
+
+  o.style.display = "block";
   v.style.display = "block";
+
   v.currentTime = 0;
   v.play();
 
-  v.onended = () => v.style.display = "none";
+  v.onended = () => {
+    v.style.display = "none";
+    o.style.display = "none";
+  };
 }
 
 function openPack() {
