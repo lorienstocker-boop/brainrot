@@ -123,7 +123,7 @@ const commonCards = {
 
   const DAILY_COOLDOWN = 24 * 60 * 60 * 1000;
 
-function updateDailyTimer() {
+  function updateDailyTimer() {
   const last = localStorage.getItem("lastDailyPack");
   const timer = document.getElementById("dailyTimer");
 
@@ -293,13 +293,14 @@ function openPack(free = false) {
 
     addCardToInventory(card);
 
+    setInterval(updateDailyTimer, 1000);
+    updateDailyTimer();
+
     
   };
 }
 
 renderInventory();
-setInterval(updateDailyTimer, 1000);
-updateDailyTimer();
 
 </script>
 
