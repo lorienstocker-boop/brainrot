@@ -3,10 +3,9 @@
 
 <head>
   <meta charset="UTF-8" />
-  <title>Brainrot Pack Simulator</title>
+  <title>brainrot pack opening simulator</title>
 
   <link rel="icon" href="meep (2).ico">
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <style>
     body {
@@ -14,37 +13,23 @@
       font-family: Arial;
       background: linear-gradient(90deg, #FFD014, #805280);
       color: white;
-    }
-
-    .header {
       text-align: center;
-      padding: 20px;
-    }
-
-    .main {
-      display: flex;
-      justify-content: center;
-      gap: 20px;
-      flex-wrap: wrap;
-      padding: 20px;
     }
 
     .panel {
-      background: rgba(0,0,0,0.35);
+      background: rgba(0,0,0,0.4);
+      margin: 20px auto;
       padding: 20px;
-      border-radius: 15px;
       width: 420px;
-      backdrop-filter: blur(6px);
+      border-radius: 15px;
     }
 
     button {
       padding: 10px 16px;
-      font-size: 16px;
       border: none;
       border-radius: 10px;
-      margin: 5px;
       cursor: pointer;
-      transition: transform 0.15s;
+      margin: 5px;
     }
 
     button:hover {
@@ -53,329 +38,197 @@
 
     #packVideo, #squishVideo {
       width: 100%;
-      border-radius: 12px;
-      margin-top: 10px;
+      border-radius: 10px;
+      display: none;
     }
 
     .cardBox {
       background: #222;
-      border: 2px solid white;
-      border-radius: 12px;
       padding: 10px;
       margin: 10px 0;
-    }
-
-    #shelfContainer {
-      position: relative;
-      width: 700px;
-      height: 500px;
-      margin: 20px auto;
-    }
-
-    #shelfImg {
-      width: 100%;
-      display: block;
-    }
-
-    #shelfItems {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
+      border-radius: 10px;
     }
   </style>
 </head>
 
 <body>
 
-<div class="header">
-  <h1>brainrot pack opening simulator</h1>
-  <p>Packs: <span id="packs">0</span></p>
-  <p id="timer"></p>
-</div>
+<h1>brainrot pack opening simulator</h1>
 
-<div class="main">
+<p>packs opened: <span id="packs">0</span></p>
+<p id="timer"></p>
 
-  <div class="panel">
-    <h2>brainrot pack opening simulator</h2>
+<div class="panel">
 
-    <button onclick="openPack()">open 1 pack</button>
-    <button onclick="openDaily()">free daily pack</button>
+  <button onclick="openPack()">Open Pack</button>
+  <button onclick="dailyPack()">Daily Pack</button>
 
-    <video id="packVideo" style="display:none;">
-      <source src="videos/opening.mp4">
-    </video>
+  <video id="packVideo">
+    <source src="videos/opening.mp4">
+  </video>
 
-    <div id="result"></div>
+  <div id="result"></div>
 
-    <img id="cardImg" style="display:none; max-width:250px;">
-  </div>
-
-  <div class="panel">
-    <h2>inventory</h2>
-    <div id="inventory"></div>
-  </div>
+  <video id="squishVideo">
+    <source src="videos/squish.mp4">
+  </video>
 
 </div>
 
-<div class="panel" style="width:700px; margin:auto;">
-  <h2>global shelf</h2>
-
-  <button onclick="loadShelf()">refresh shelf</button>
-
-  <div id="shelfContainer">
-    <img src="images/shelf.png" id="shelfImg">
-    <div id="shelfItems"></div>
-  </div>
+<div class="panel">
+  <h2>Inventory</h2>
+  <div id="inventory"></div>
 </div>
-
-<video id="squishVideo" style="display:none;">
-  <source src="videos/squish.mp4">
-</video>
 
 <script>
 
-const supabaseClient = window.supabase.createClient(
-  "https://istttzdbafsurjrefdwm.supabase.co",
-  "sb_publishable_4bjO8-2p6WIw0XxU8zDg9Q_Ydpffo8t"
-);
+const COOLDOWN = 86400000;
 
 let packs = parseInt(localStorage.getItem("packs")) || 0;
-let coins = parseInt(localStorage.getItem("coins")) || 60;
 let inventory = JSON.parse(localStorage.getItem("inv") || "[]");
+let lastDaily = parseInt(localStorage.getItem("daily") || "0");
 
 document.getElementById("packs").innerText = packs;
 
-const Cards = {
-  epic: {
-    "tralalero tralala": "epic"
-  },
-
-  insane: {
-    "apple pen dude": "insane"
-  },
-
-  rare: {
-    "ballerina cappucina": "rare",
-    "cappucino assassino": "rare"
-  },
-
-  uncommon: {
-    "bombardino crocodilo": "uncommon",
-    "tung tung tung sahur": "uncommon"
-  },
-
-  common: {
-    "skibidi": "common",
-    "tripi tropi": "common"
-  }
+const cards = {
+  common: ["skibidi", "tripi tropi", "simon claw"],
+  uncommon: ["bombardino crocodilo", "tung tung tung sahur", "john pork"],
+  rare: ["ballerina cappucina", "cappucino assassino"],
+  epic: ["tralalero tralala", "67", "tim cheese"],
+  insane: ["apple pen dude"]
 };
+
+function randomCard() {
+  let r = Math.random();
+
+  let pool =
+    r < 0.03 ? cards.insane :
+    r < 0.08 ? cards.epic :
+    r < 0.18 ? cards.rare :
+    r < 0.58 ? cards.uncommon :
+    cards.common;
+
+  let name = pool[Math.floor(Math.random() * pool.length)];
+
+  let rarity =
+    cards.common.includes(name) ? "common" :
+    cards.uncommon.includes(name) ? "uncommon" :
+    cards.rare.includes(name) ? "rare" :
+    cards.epic.includes(name) ? "epic" :
+    "insane";
+
+  return { name, rarity };
+}
 
 function save() {
   localStorage.setItem("packs", packs);
-  localStorage.setItem("coins", coins);
   localStorage.setItem("inv", JSON.stringify(inventory));
+  localStorage.setItem("daily", lastDaily);
 }
 
-function randomCard() {
+function render() {
+  let div = document.getElementById("inventory");
+  div.innerHTML = "";
 
-  const roll = Math.random();
+  inventory.forEach((c, i) => {
 
-  let pool =
-    roll < 0.03 ? Cards.insane :
-    roll < 0.08 ? Cards.epic :
-    roll < 0.18 ? Cards.rare :
-    roll < 0.58 ? Cards.uncommon :
-    Cards.common;
+    let btn = `<button onclick="sell(${i})">sell</button>`;
 
-  const keys = Object.keys(pool);
-
-  const name =
-    keys[Math.floor(Math.random() * keys.length)];
-
-  return {
-    name,
-    rarity: pool[name]
-  };
-}
-
-function value(rarity) {
-
-  return {
-    common: 10,
-    uncommon: 25,
-    rare: 60,
-    epic: 150,
-    insane: 500
-  }[rarity] || 10;
-}
-
-function renderInventory() {
-
-  const div = document.getElementById("inventory");
-
-  div.innerHTML = `
-    <p>coins: ${coins}</p>
-  `;
-
-  inventory.forEach((card, i) => {
-
-    let buttons =
-      `<button onclick="sell(${i})">sell</button>`;
-
-    if (card.name === "tung tung tung sahur") {
-
-      buttons +=
-        `<button onclick="squish()">squish</button>`;
+    if (c.name === "tung tung tung sahur") {
+      btn += `<button onclick="squish()">squish</button>`;
     }
 
     div.innerHTML += `
       <div class="cardBox">
-        <b>${card.name}</b><br>
-        ${card.rarity}<br><br>
-        ${buttons}
+        <b>${c.name}</b><br>
+        ${c.rarity}<br>
+        ${btn}
       </div>
     `;
   });
 }
 
 function sell(i) {
-
-  coins += value(inventory[i].rarity);
-
   inventory.splice(i, 1);
-
   save();
-
-  renderInventory();
+  render();
 }
 
 function squish() {
+  let v = document.getElementById("squishVideo");
+  v.style.display = "block";
+  v.currentTime = 0;
+  v.play();
 
-  const video =
-    document.getElementById("squishVideo");
+  v.onended = () => {
+    v.style.display = "none";
+  };
+}
+
+function openPack() {
+
+  const card = randomCard();
+
+  packs++;
+  document.getElementById("packs").innerText = packs;
+
+  save();
+
+  let video = document.getElementById("packVideo");
+  let result = document.getElementById("result");
+
+  result.innerText = "";
 
   video.style.display = "block";
-
   video.currentTime = 0;
-
   video.play();
 
   video.onended = () => {
 
     video.style.display = "none";
+
+    inventory.push(card);
+    save();
+    render();
+
+    result.innerText = `You got ${card.name} (${card.rarity})`;
   };
 }
 
-async function addToShelf(card) {
+function dailyPack() {
 
-  await supabaseClient
-    .from("shelf")
-    .insert([card]);
-}
+  let now = Date.now();
 
-async function loadShelf() {
-
-  const { data, error } =
-    await supabaseClient
-      .from("shelf")
-      .select("*")
-      .order("id", { ascending: false });
-
-  if (error) {
-    console.log(error);
+  if (now - lastDaily < COOLDOWN) {
+    alert("Daily not ready yet!");
     return;
   }
 
-  const div =
-    document.getElementById("shelfItems");
-
-  div.innerHTML = "";
-
-  (data || []).forEach((item, i) => {
-
-    div.innerHTML += `
-      <div style="
-        position:absolute;
-        left:${(i % 5) * 120 + 40}px;
-        top:${Math.floor(i / 5) * 145 + 40}px;
-        width:90px;
-        background:#222;
-        border:2px solid white;
-        border-radius:10px;
-        padding:5px;
-        font-size:12px;
-        text-align:center;
-      ">
-        ${item.name}
-      </div>
-    `;
-  });
-}
-
-function openDaily() {
-  openPack(true);
-}
-
-function openPack(free = false) {
-
-  const card = randomCard();
-
-  packs++;
-
-  document.getElementById("packs").innerText = packs;
-
+  lastDaily = now;
   save();
 
-  const video =
-    document.getElementById("packVideo");
-
-  const result =
-    document.getElementById("result");
-
-  const img =
-    document.getElementById("cardImg");
-
-  result.innerText = "";
-
-  img.style.display = "none";
-
-  video.style.display = "block";
-
-  video.currentTime = 0;
-
-  video.play();
-
-  video.onended = async () => {
-
-    video.style.display = "none";
-
-    inventory.push(card);
-
-    save();
-
-    renderInventory();
-
-    await addToShelf(card);
-
-    loadShelf();
-
-    result.innerText =
-      `You got ${card.name} (${card.rarity})`;
-
-    img.src =
-      `images/${card.name}.png`;
-
-    img.style.display = "block";
-  };
+  openPack();
 }
 
-renderInventory();
+function updateTimer() {
+  let t = document.getElementById("timer");
 
-loadShelf();
+  let left = COOLDOWN - (Date.now() - lastDaily);
 
-setInterval(loadShelf, 4000);
+  if (left <= 0) {
+    t.innerText = "Daily ready!";
+  } else {
+    let h = Math.floor(left / 3600000);
+    let m = Math.floor((left % 3600000) / 60000);
+    let s = Math.floor((left % 60000) / 1000);
+
+    t.innerText = `Next daily: ${h}h ${m}m ${s}s`;
+  }
+}
+
+setInterval(updateTimer, 1000);
+
+render();
 
 </script>
 
