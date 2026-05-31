@@ -117,7 +117,7 @@ p:hover, h1:hover, h2:hover, h3:hover, span:hover {
 <h2>inventory</h2>
 <div id="inventory"></div>
 
-<h2>Global Shelf</h2>
+<h2>global shelf</h2>
 
 <div id="shelfContainer">
   <img id="shelfImg" src="images/shelf.png">
@@ -127,6 +127,8 @@ p:hover, h1:hover, h2:hover, h3:hover, span:hover {
 <video id="squishVideo" controls>
   <source src="videos/squish.mp4">
 </video>
+
+<div id="overlay"></div>
 
 <script>
 
@@ -216,18 +218,41 @@ function sell(i) {
 }
 
 function squish() {
-  let v = document.getElementById("squishVideo");
-  let o = document.getElementById("overlay");
+  const video = document.getElementById("squishVideo");
+  const overlay = document.getElementById("overlay");
 
-  o.style.display = "block";
-  v.style.display = "block";
+  if (!video) {
+    alert("squishVideo not found in HTML");
+    return;
+  }
 
-  v.currentTime = 0;
-  v.play();
+  if (!overlay) {
+    alert("overlay not found in HTML");
+    return;
+  }
 
-  v.onended = () => {
-    v.style.display = "none";
-    o.style.display = "none";
+  overlay.style.display = "block";
+  video.style.display = "block";
+
+  video.style.position = "fixed";
+  video.style.top = "50%";
+  video.style.left = "50%";
+  video.style.transform = "translate(-50%, -50%)";
+  video.style.zIndex = "9999";
+
+  video.currentTime = 0;
+
+  const playPromise = video.play();
+
+  if (playPromise !== undefined) {
+    playPromise.catch(err => {
+      console.log("Video play blocked:", err);
+    });
+  }
+
+  video.onended = () => {
+    video.style.display = "none";
+    overlay.style.display = "none";
   };
 }
 
