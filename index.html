@@ -72,7 +72,8 @@
 <body>
 
 <h1>brainrot pack opening simulator</h1>
-
+  
+<p>Coins: <span id="coins">60</span></p>
 <p>packs opened: <span id="count">0</span></p>
 <p id="timer"></p>
 
@@ -110,6 +111,7 @@ const DAILY = 24 * 60 * 60 * 1000;
 let packs = parseInt(localStorage.getItem("packs")) || 0;
 let inventory = JSON.parse(localStorage.getItem("inv") || "[]");
 let lastDaily = parseInt(localStorage.getItem("daily")) || 0;
+let coins = parseInt(localStorage.getItem("coins")) || 60;
 
 document.getElementById("count").innerText = packs;
 
@@ -152,6 +154,7 @@ function save() {
   localStorage.setItem("inv", JSON.stringify(inventory));
   localStorage.setItem("packs", packs);
   localStorage.setItem("daily", lastDaily);
+  localStorage.setItem("coins", coins);
 }
 
 function renderInventory() {
@@ -194,6 +197,12 @@ function openPack() {
 
   let card = randomCard();
 
+  if (coins < 10) {
+    alert("not enough coins lil bro yah need to lock in!!!! :3");
+    return;
+  }
+
+
   packs++;
   document.getElementById("count").innerText = packs;
   save();
@@ -218,6 +227,8 @@ function openPack() {
 
     document.getElementById("result").innerText =
       `You got ${card.name} (${card.rarity})`;
+
+    coins -= 10;
   };
 }
 
@@ -255,6 +266,9 @@ function renderShelf() {
     `;
   });
 }
+  
+
+document.getElementById("coins").innerText = coins;
 
 setInterval(() => {
   updateTimer();
