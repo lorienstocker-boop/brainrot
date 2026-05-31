@@ -123,15 +123,6 @@ const commonCards = {
 
   const DAILY_COOLDOWN = 24 * 60 * 60 * 1000;
 
-  function updateDailyTimer() {
-  const last = localStorage.getItem("lastDailyPack");
-  const timer = document.getElementById("dailyTimer");
-
-  if (!last) {
-    timer.innerText = "Daily Pack: ready!";
-    return;
-  }
-
   const timeLeft = DAILY_COOLDOWN - (Date.now() - parseInt(last));
 
   if (timeLeft <= 0) {
@@ -190,6 +181,31 @@ function squishCard() {
   video.onended = function () {
     video.style.display = "none";
   };
+}
+
+  function updateDailyTimer() {
+  const timer = document.getElementById("dailyTimer");
+  if (!timer) return;
+
+  const last = localStorage.getItem("lastDailyPack");
+
+  if (!last) {
+    timer.innerText = "Daily Pack: ready!";
+    return;
+  }
+
+  const timeLeft = DAILY_COOLDOWN - (Date.now() - parseInt(last));
+
+  if (timeLeft <= 0) {
+    timer.innerText = "Daily Pack: ready!";
+    return;
+  }
+
+  const hours = Math.floor(timeLeft / (1000 * 60 * 60));
+  const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+  const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+
+  timer.innerText = `Next Daily Pack in ${hours}h ${minutes}m ${seconds}s`;
 }
 
 function renderInventory() {
