@@ -76,38 +76,40 @@
 
 <body>
 
-  <h1>brainrot booster pack opening simulation</h1>
+<h1>brainrot booster pack opening simulation</h1>
 
-  <button onclick="openPack()">Open Pack</button>
-  <button onclick="claimDailyPack()">Free Daily Pack!!! :3</button>
+<button onclick="openPack()">Open Pack</button>
+<button onclick="claimDailyPack()">Free Daily Pack!!! :3</button>
 
-  <p>total packs opened: <span id="count">0</span></p>
-  <p id="dailyTimer"></p>
+<p>total packs opened: <span id="count">0</span></p>
+<p id="dailyTimer"></p>
 
-  <h2>Global Shelf</h2>
-  <button onclick="loadShelf()">Refresh Shelf</button>
-  <div id="shelf"></div>
+<h2>Global Shelf</h2>
+<button onclick="loadShelf()">Refresh Shelf</button>
+<div id="shelf"></div>
 
-  <video id="packVideo" width="500" style="display:none;">
-    <source src="videos/opening.mp4" type="video/mp4">
-  </video>
+<video id="packVideo" width="500" style="display:none;">
+  <source src="videos/opening.mp4" type="video/mp4">
+</video>
 
-  <video id="squishVideo" width="500" style="display:none;">
-    <source src="videos/squish.mp4" type="video/mp4">
-  </video>
+<video id="squishVideo" width="500" style="display:none;">
+  <source src="videos/squish.mp4" type="video/mp4">
+</video>
 
-  <div id="result"></div>
-  <div id="outcome"></div>
+<div id="result"></div>
+<div id="outcome"></div>
 
-  <img id="cardImage" src="" style="display:none;">
+<img id="cardImage" src="" style="display:none;">
 
-  <div id="inventory">
-    <h2>Inventory</h2>
-  </div>
+<div id="inventory">
+  <h2>Inventory</h2>
+</div>
 
 <script>
 
-const DAILY_COOLDOWN = 24 * 60 * 60 * 1000;
+const supabaseUrl = "https://istttzdbafsurjrefdwm.supabase.co";
+const supabaseKey = "sb_publishable_4bjO8-2p6WIw0XxU8zDg9Q_Ydpffo8t";
+const supabase = supabase.createClient ? supabase : window.supabase.createClient(supabaseUrl, supabaseKey);
 
 let packsOpened = parseInt(localStorage.getItem("packsOpened")) || 0;
 let inventory = JSON.parse(localStorage.getItem("inventory") || "[]");
@@ -115,34 +117,36 @@ let coins = parseInt(localStorage.getItem("coins")) || 60;
 
 document.getElementById("count").textContent = packsOpened;
 
-// Supabase
-const supabaseUrl = "https://istttzdbafsurjrefdwm.supabase.co";
-const supabaseKey = "sb_publishable_4bjO8-2p6WIw0XxU8zDg9Q_Ydpffo8t"; 
-const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+const DAILY_COOLDOWN = 24 * 60 * 60 * 1000;
 
+// CARDS
+const epicCards = { "tralalero tralala": "epic" };
+const insaneCards = { "apple pen dude": "insane" };
+const rareCards = {
+  "ballerina cappucina": "rare",
+  "cappucino assassino": "rare"
+};
+const uncommonCards = {
+  "bombardino crocodilo": "uncommon",
+  "tung tung tung sahur": "uncommon"
+};
+const commonCards = {
+  "tripi tropi": "common",
+  "skibidi": "common"
+};
+
+// SAFE SHELF
 async function addToShelf(card) {
-  try {
-    await supabase.from("shelf").insert([
-      {
-        name: card.name,
-        rarity: card.rarity
-      }
-    ]);
-  } catch (err) {
-    console.log("Shelf insert error:", err);
-  }
+  await supabase.from("shelf").insert([
+    { name: card.name, rarity: card.rarity }
+  ]);
 }
 
 async function loadShelf() {
-  const { data, error } = await supabase
+  const { data } = await supabase
     .from("shelf")
     .select("*")
     .order("id", { ascending: false });
-
-  if (error) {
-    console.log("Shelf load error:", error);
-    return;
-  }
 
   const shelfDiv = document.getElementById("shelf");
   if (!shelfDiv) return;
@@ -159,7 +163,7 @@ async function loadShelf() {
   });
 }
 
-// Game logic
+// GAME
 function saveGame() {
   localStorage.setItem("inventory", JSON.stringify(inventory));
   localStorage.setItem("coins", coins);
@@ -168,19 +172,18 @@ function saveGame() {
 
 function chooseRandomCard(cards) {
   const keys = Object.keys(cards);
-  const card = keys[Math.floor(Math.random() * keys.length)];
-  return { name: card, rarity: cards[card] };
+  const name = keys[Math.floor(Math.random() * keys.length)];
+  return { name, rarity: cards[name] };
 }
 
 function getCardValue(rarity) {
-  const values = {
+  return {
     common: 10,
     uncommon: 25,
     rare: 60,
     epic: 150,
     insane: 500
-  };
-  return values[rarity] ?? 10;
+  }[rarity] || 10;
 }
 
 function addCardToInventory(card) {
@@ -201,10 +204,7 @@ function squishCard() {
   video.style.display = "block";
   video.currentTime = 0;
   video.play();
-
-  video.onended = () => {
-    video.style.display = "none";
-  };
+  video.onended = () => video.style.display = "none";
 }
 
 function renderInventory() {
@@ -215,67 +215,57 @@ function renderInventory() {
     <h3>Coins: ${coins}</h3>
   `;
 
-  inventory.forEach((card, index) => {
-    const isTung = card.name === "tung tung tung sahur";
-
-    let buttons = `<button onclick="sellCard(${index})">sell</button>`;
-
-    if (isTung) {
-      buttons += `<button onclick="squishCard()">squish</button>`;
+  inventory.forEach((card, i) => {
+    let btn = `<button onclick="sellCard(${i})">sell</button>`;
+    if (card.name === "tung tung tung sahur") {
+      btn += `<button onclick="squishCard()">squish</button>`;
     }
 
     div.innerHTML += `
       <div class="cardBox">
         <h3>${card.name}</h3>
         <p>${card.rarity}</p>
-        <p>Value: ${getCardValue(card.rarity)}</p>
-        ${buttons}
+        ${btn}
       </div>
     `;
   });
-
-  if (inventory.length === 0) {
-    div.innerHTML += `<p>No cards yet.</p>`;
-  }
 }
 
-// Daily
+// DAILY
+function updateDailyTimer() {
+  const el = document.getElementById("dailyTimer");
+  const last = localStorage.getItem("lastDailyPack");
+
+  if (!last) {
+    el.innerText = "daily pack: ready!";
+    return;
+  }
+
+  const t = DAILY_COOLDOWN - (Date.now() - parseInt(last));
+  if (t <= 0) {
+    el.innerText = "daily pack: ready!";
+    return;
+  }
+
+  const h = Math.floor(t / 3600000);
+  const m = Math.floor((t % 3600000) / 60000);
+  const s = Math.floor((t % 60000) / 1000);
+
+  el.innerText = `next daily pack in ${h}h ${m}m ${s}s`;
+}
+
 function canClaimDaily() {
   const last = localStorage.getItem("lastDailyPack");
-  if (!last) return true;
-  return Date.now() - parseInt(last) > DAILY_COOLDOWN;
+  return !last || Date.now() - parseInt(last) > DAILY_COOLDOWN;
 }
 
 function claimDailyPack() {
-  if (!canClaimDaily()) return alert("Come back later!");
+  if (!canClaimDaily()) return alert("come back later!");
   localStorage.setItem("lastDailyPack", Date.now());
   openPack(true);
 }
 
-function updateDailyTimer() {
-  const timer = document.getElementById("dailyTimer");
-  const last = localStorage.getItem("lastDailyPack");
-
-  if (!last) {
-    timer.innerText = "daily pack: ready!";
-    return;
-  }
-
-  const timeLeft = DAILY_COOLDOWN - (Date.now() - parseInt(last));
-
-  if (timeLeft <= 0) {
-    timer.innerText = "daily pack: ready!";
-    return;
-  }
-
-  const h = Math.floor(timeLeft / 3600000);
-  const m = Math.floor((timeLeft % 3600000) / 60000);
-  const s = Math.floor((timeLeft % 60000) / 1000);
-
-  timer.innerText = `next daily pack in ${h}h ${m}m ${s}s`;
-}
-
-// PACK OPENING
+// PACK
 function openPack(free = false) {
 
   if (!free) {
@@ -284,65 +274,60 @@ function openPack(free = false) {
   }
 
   const roll = Math.random();
-  let cards;
+  let pool =
+    roll < 0.03 ? insaneCards :
+    roll < 0.08 ? epicCards :
+    roll < 0.18 ? rareCards :
+    roll < 0.58 ? uncommonCards :
+    commonCards;
 
-  if (roll < 0.03) cards = insaneCards;
-  else if (roll < 0.08) cards = epicCards;
-  else if (roll < 0.18) cards = rareCards;
-  else if (roll < 0.58) cards = uncommonCards;
-  else cards = commonCards;
-
-  const card = chooseRandomCard(cards);
+  const card = chooseRandomCard(pool);
 
   packsOpened++;
   document.getElementById("count").textContent = packsOpened;
-  addToShelf(card);
 
   saveGame();
 
   addToShelf(card);
+  addCardToInventory(card);
 
   const video = document.getElementById("packVideo");
   const result = document.getElementById("result");
-  const image = document.getElementById("cardImage");
+  const img = document.getElementById("cardImage");
   const outcome = document.getElementById("outcome");
 
   result.innerText = "";
   outcome.innerText = "";
-  image.style.display = "none";
+  img.style.display = "none";
 
   video.style.display = "block";
   video.currentTime = 0;
   video.play();
 
-  video.onended = function () {
-
+  video.onended = () => {
     video.style.display = "none";
 
     result.innerText = `You got ${card.name} (${card.rarity})`;
 
-    image.src = `images/${card.name}.png`;
-    image.style.display = "block";
+    img.src = `images/${card.name}.png`;
+    img.style.display = "block";
 
-    const value = getCardValue(card.rarity);
+    const v = getCardValue(card.rarity);
 
     outcome.innerText =
-      value >= 500 ? "SUPER WIN!!!!!!" :
-      value < 20 ? "LOSE" : "WIN!";
+      v >= 500 ? "SUPER WIN!!!!!!" :
+      v < 20 ? "LOSE" : "WIN!";
 
     outcome.style.color =
-      value >= 500 ? "gold" :
-      value < 20 ? "red" : "lime";
-
-    addCardToInventory(card);
+      v >= 500 ? "gold" :
+      v < 20 ? "red" : "lime";
   };
 }
 
-// init
+// INIT
 renderInventory();
 updateDailyTimer();
 setInterval(updateDailyTimer, 1000);
-
 loadShelf();
 setInterval(loadShelf, 3000);
 
