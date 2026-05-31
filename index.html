@@ -93,19 +93,24 @@
     }
 
     
-    .ad {
-      width: 160px;
-      min-height: 600px;
-    }
+   .page {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  width: 100%;
+  min-height: 100vh;
+}
 
-    .page {
-      display: flex;
-      justify-content: space-between;
-    }
+main {
+  flex: 1;
+  max-width: 100%;
+}
 
-    main {
-      flex: 1;
-    }
+.ad {
+  width: 160px;
+  min-height: 600px;
+  display: block;
+}
   </style>
 </head>
 
