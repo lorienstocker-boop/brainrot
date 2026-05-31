@@ -65,9 +65,17 @@
       margin: 10px 0;
     }
 
-    /* =========================
-       FIXED VERTICAL SHELF
-       ========================= */
+    p, h1, h2, h3, span {
+      transition: transform 0.15s ease, text-shadow 0.15s ease;
+      display: inline-block;
+    }
+
+    p:hover, h1:hover, h2:hover, h3:hover, span:hover {
+      transform: scale(1.08);
+      text-shadow: 0 0 10px rgba(255,255,255,0.6);
+    }
+
+
 
     #shelfContainer {
       position: relative;
@@ -75,7 +83,7 @@
       height: 500px;
       margin: 20px auto;
 
-      overflow-y: auto;
+      overflow-y: auto;   
       overflow-x: hidden;
     }
 
@@ -113,16 +121,6 @@
       font-size: 12px;
     }
 
-    p, h1, h2, h3, span {
-      transition: transform 0.15s ease, text-shadow 0.15s ease;
-      display: inline-block;
-    }
-
-    p:hover, h1:hover, h2:hover, h3:hover, span:hover {
-      transform: scale(1.08);
-      text-shadow: 0 0 10px rgba(255,255,255,0.6);
-    }
-
   </style>
 </head>
 
@@ -130,13 +128,16 @@
 
 <div class="header">
   <h1>brainrot pack opening simulator</h1>
+  <p>Packs: <span id="packs">0</span></p>
 </div>
 
 <div class="main">
 
   <div class="panel">
-    <h2>packs</h2>
+    <h2>brainrot pack opening simulator</h2>
+
     <button onclick="openPack()">open 1 pack</button>
+
     <div id="result"></div>
 
     <video id="packVideo" style="display:none;">
@@ -166,6 +167,18 @@ const supabaseClient = window.supabase.createClient(
   "sb_publishable_4bjO8-2p6WIw0XxU8zDg9Q_Ydpffo8t"
 );
 
+
+
+let packs = parseInt(localStorage.getItem("packs")) || 0;
+let coins = parseInt(localStorage.getItem("coins")) || 60;
+let inventory = JSON.parse(localStorage.getItem("inv") || "[]");
+
+function save() {
+  localStorage.setItem("packs", packs);
+  localStorage.setItem("coins", coins);
+  localStorage.setItem("inv", JSON.stringify(inventory));
+}
+
 function randomCard() {
   const names = ["skibidi", "john pork", "tung tung tung sahur", "bombardino crocodilo"];
   return {
@@ -174,9 +187,26 @@ function randomCard() {
   };
 }
 
-/* =========================
-   SHELF SYSTEM FIXED
-   ========================= */
+function openPack() {
+  const card = randomCard();
+
+  packs++;
+  document.getElementById("packs").innerText = packs;
+
+  inventory.push(card);
+  save();
+
+  document.getElementById("result").innerText =
+    `You got ${card.name} (${card.rarity})`;
+
+  addToShelf(card);
+}
+
+
+
+async function addToShelf(card) {
+  await supabaseClient.from("shelf").insert([card]);
+}
 
 async function loadShelf() {
 
@@ -203,7 +233,7 @@ async function loadShelf() {
   });
 }
 
-/* 🔥 infinite vertical scroll */
+
 const container = document.getElementById("shelfContainer");
 
 setInterval(() => {
@@ -216,7 +246,12 @@ setInterval(() => {
 
 }, 50);
 
+loadShelf();
+
 </script>
+
+</body>
+</html>
 
 </body>
 </html>
