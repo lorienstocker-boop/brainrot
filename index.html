@@ -161,6 +161,11 @@ function value(r) {
   return { common:10, uncommon:25, rare:60, epic:150, insane:500 }[r] || 10;
 }
 
+function updateUI() {
+  document.getElementById("coins").innerText = coins;
+  document.getElementById("count").innerText = packs;
+}
+
 function save() {
   localStorage.setItem("inv", JSON.stringify(inventory));
   localStorage.setItem("packs", packs);
@@ -190,8 +195,10 @@ function renderInventory() {
 }
 
 function sell(i) {
+  coins += value(inventory[i].rarity);
   inventory.splice(i,1);
   save();
+  updateUI();
   renderInventory();
 }
 
@@ -215,6 +222,7 @@ function openPack() {
 
   coins -= 10;
   document.getElementById("coins").innerText = coins;
+  updateUI();
 
 
   packs++;
