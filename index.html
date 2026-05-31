@@ -111,8 +111,8 @@ const rareCards = {
 };
 
 const uncommonCards = {
-  "bombardino crocodilo": "uncommon"
-  "tung tung tung sahur": "uncommon",
+  "bombardino crocodilo": "uncommon",
+  "tung tung tung sahur": "uncommon"
 };
 
 const commonCards = {
@@ -180,10 +180,10 @@ function renderInventory() {
   inventory.forEach((card, index) => {
     const isTung = card.name === "tung tung tung sahur";
 
-    let buttons = `<button onclick="sellCard(${index})">Sell</button>`;
+    let buttons = `<button onclick="sellCard(${index})">sell</button>`;
 
     if (isTung) {
-      buttons += `<button onclick="squishCard()">Squish</button>`;
+      buttons += `<button onclick="squishCard()">squish</button>`;
     }
 
     div.innerHTML += `
@@ -231,7 +231,7 @@ function updateDailyTimer() {
   const timeLeft = DAILY_COOLDOWN - (Date.now() - parseInt(last));
 
   if (timeLeft <= 0) {
-    timer.innerText = "Daily Pack: ready!";
+    timer.innerText = "daily pack: ready!";
     return;
   }
 
@@ -239,7 +239,7 @@ function updateDailyTimer() {
   const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
   const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
 
-  timer.innerText = `Next Daily Pack in ${hours}h ${minutes}m ${seconds}s`;
+  timer.innerText = `next daily pack in ${hours}h ${minutes}m ${seconds}s`;
 }
 
 function openPack(free = false) {
