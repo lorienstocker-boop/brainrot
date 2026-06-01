@@ -134,12 +134,12 @@ button:hover {
 <br>
 <p>packs opened: <span id="count">0</span></p>
 <br>
-<p>next daily pack in: <span id="dailyTimer"></span></p>
+<p>next daily reward in: <span id="dailyTimer"></span></p>
 
 <br><br>
 
 <button onclick="openPack()">open pack</button>
-<button onclick="claimDaily()">claim daily pack</button>
+<button onclick="claimDaily()">claim daily reward!</button>
 
 <br><br>
 
@@ -419,18 +419,18 @@ function claimDaily() {
   let now = Date.now();
 
   if (now - lastDaily < DAILY) {
-    alert("daily pack not ready yet");
+    alert("daily reward not ready yet");
     return;
   }
 
   lastDaily = now;
 
-  coins += 30;
+  coins += 100;
 
   save();
   updateUI();
 
-  alert("daily reward claimed! +30 coins");
+  alert("daily reward claimed :3 +100 coins!!!!!");
 }
 
 function updateDailyTimer() {
