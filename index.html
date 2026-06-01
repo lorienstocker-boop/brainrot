@@ -19,17 +19,16 @@
   text-shadow: 0 0 10px rgba(255,255,255,0.6);
 }
 
-body {
-  margin: 0;
-  font-family: Arial;
-  text-align: center;
+body.menu {
+  background: url("menu-bg.jpg") center/cover no-repeat;
+}
+
+body.game {
   background: linear-gradient(90deg, #FFD014, #805280);
 }
 
 body.premium {
-  background: url("images__1_-removebg-preview.png") center/cover no-repeat;
-  background-attachment: fixed;
-  background-size: cover;
+  background: url("premium-bg.png") center/cover no-repeat;
 }
 
 button {
@@ -52,18 +51,6 @@ button:hover { transform: scale(1.05); }
 }
 
 
-#menu {
-  position: fixed;
-  inset: 0;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  background: linear-gradient(90deg, #FFD014, #805280);
-  z-index: 9999;
-}
-
-
 #game {
   display: none;
 }
@@ -81,7 +68,7 @@ button:hover { transform: scale(1.05); }
 </style>
 </head>
 
-<body>
+<body class="menu">
 
 
 <div id="menu">
@@ -130,13 +117,14 @@ let coins = parseInt(localStorage.getItem("coins")) || 60;
 let premium = localStorage.getItem("premium") === "true";
 
 const DAILY = 11 * 60 * 60 * 1000;
-
-
 window.startGame = function () {
+
+  document.body.classList.remove("menu");
+  document.body.classList.add("game");
+
   document.getElementById("menu").style.display = "none";
   document.getElementById("game").style.display = "block";
 };
-
 
 function buyPremium() {
   window.open("https://lorienstox.gumroad.com/l/attrhu", "_blank");
