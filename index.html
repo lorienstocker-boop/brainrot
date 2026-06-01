@@ -104,6 +104,10 @@ button:hover { transform: scale(1.05); }
   <source src="videos/squish.mp4">
 </video>
 
+<video id="packVideo" controls style="width:300px; display:none; margin:10px auto;">
+  <source src="videos/opening.mp4">
+</video>
+
 </div>
 
 <script>
@@ -149,6 +153,14 @@ function openPack() {
   packs++;
 
   let card = randomCard();
+
+  let video = document.getElementById("packVideo");
+  video.style.display = "block";
+  video.currentTime = 0;
+  video.play();
+
+  video.onended = () => {
+  video.style.display = "none";
 
   inventory.push(card);
   save();
