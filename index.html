@@ -107,14 +107,14 @@ buy premium :3 ($2.50)
 </button>
 
 <button onclick="redeemCode()">
-redeem code
+redeem code :3
 </button>
 
 <p id="premiumText"></p>
 
 <p>packs opened: <span id="count">0</span></p>
 
-<button onclick="openPack()">open pack</button>
+<button onclick="openPack()">open pack :3</button>
 <button onclick="claimDaily()">claim daily pack</button>
 <button onclick="updateUI();">show correct coin balance</button>
 
@@ -359,16 +359,12 @@ function renderShelf() {
   });
 }
 
-  let isPremium = false;
 
-  if localStorage.getItem("premium") === true {
-    isPremium = true;
-  }
+let isPremium = localStorage.getItem("premium") === "true";
 
-  if (isPremium) {
-    document.body.classList.add("premium");
-  }
-  
+if (isPremium) {
+  document.body.classList.add("premium");
+}
 
 setInterval(() => {
   updateTimer();
