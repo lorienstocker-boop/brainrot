@@ -1,4 +1,3 @@
-```html
 <!DOCTYPE html>
 <html>
 
@@ -18,7 +17,6 @@ html, body {
   overflow-x: hidden;
 }
 
-
 #menu {
   height: 100vh;
   display: flex;
@@ -27,88 +25,53 @@ html, body {
   align-items: center;
 }
 
-
-  body {
-  margin: 0;
-  height: 100vh;
-  font-family: Arial;
-  text-align: center;
-  color: white;
-}
-
-html, body {
-  margin: 0;
-  height: 100%;
-  font-family: Arial;
-  text-align: center;
-  color: white;
-}
-
-
 body {
   background: url("apple.png") center/cover no-repeat fixed;
+  transition: all 0.3s ease;
 }
-
 
 body.premium {
   background: url("images__1_-removebg-preview.png") center/cover no-repeat fixed;
 }
-
-
 
 #game {
   display: none;
   padding: 20px;
 }
 
-
 button {
   padding: 10px 16px;
   margin: 5px;
-
   border: none;
   border-radius: 10px;
-
   background: #333;
   color: white;
-
   cursor: pointer;
 }
-
-  
-body {
-  transition: all 0.3s ease;
-}
-
 
 h1, h2, h3, h4, h5, h6,
 p, span, a, button, li {
   transition: 0.2s ease;
   display: inline-block;
-  transform-origin: center;
 }
 
 h1:hover, h2:hover, h3:hover, h4:hover, h5:hover, h6:hover,
 p:hover, span:hover, a:hover, button:hover, li:hover {
-  color: ##FF004D, #FF6C00;
+  color: #FF004D;
   text-shadow: 0 0 10px #ffd014;
   transform: scale(1.05);
 }
 
-
-  #squishVideo,
+#squishVideo,
 #packVideo {
   position: fixed;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-
   width: 400px;
   max-width: 90vw;
-
   display: none;
   z-index: 9999;
-
   background: black;
   border-radius: 12px;
 }
@@ -128,12 +91,8 @@ p:hover, span:hover, a:hover, button:hover, li:hover {
 
 <div id="menu">
   <h1 style="color: red">brainrot opener</h1>
-
   <button onclick="startGame()">play</button>
-
-  <button onclick="buyPremium()">
-    buy premium
-  </button>
+  <button onclick="buyPremium()">buy premium</button>
 </div>
 
 <div id="game">
@@ -148,9 +107,7 @@ p:hover, span:hover, a:hover, button:hover, li:hover {
 <br>
 
 <p>coins: <span id="coins">60</span></p>
-<br>
-<p>packs opened: <span id="count">0</span></p>
-<br>
+<p>packs opened: <span id="count"></span></p>
 <p>next daily reward in: <span id="dailyTimer"></span></p>
 
 <br><br>
@@ -169,9 +126,7 @@ p:hover, span:hover, a:hover, button:hover, li:hover {
   <source src="videos/squish.mp4">
 </video>
 
-<video id="packVideo"
-       controls
-       style="width:300px; display:none; margin:10px auto;">
+<video id="packVideo" controls style="width:300px; display:none; margin:10px auto;">
   <source src="videos/opening2.mp4">
 </video>
 
@@ -188,40 +143,25 @@ let premium = localStorage.getItem("premium") === "true";
 const DAILY = 11 * 60 * 60 * 1000;
 
 window.startGame = function () {
-
   document.body.classList.remove("menu");
   document.body.classList.add("game");
-
   document.getElementById("menu").style.display = "none";
   document.getElementById("game").style.display = "block";
 };
 
 function buyPremium() {
-
-  window.open(
-    "https://lorienstox.gumroad.com/l/attrhu",
-    "_blank"
-  );
-
+  window.open("https://lorienstox.gumroad.com/l/attrhu", "_blank");
   premium = true;
-
   localStorage.setItem("premium", "true");
-
   updateUI();
 }
 
 function redeemCode() {
-
   let code = prompt("Enter code:");
-
   if (code === "BRAINROT2026") {
-
     premium = true;
-
     localStorage.setItem("premium", "true");
-
     updateUI();
-
     alert("premium unlocked!");
   }
 }
@@ -243,17 +183,14 @@ const Cards = {
   },
 
   rare: {
-
     "ballerina cappucina": {
       rarity: "rare",
       image: "images/ballerina cappucina.png"
     },
-
     "cappucino assassino": {
       rarity: "rare",
       image: "images/cappucino assassino.png"
     },
-
     "tim cheese": {
       rarity: "rare",
       image: "images/tim cheese.png"
@@ -261,7 +198,6 @@ const Cards = {
   },
 
   uncommon: {
-
     "bombardino crocodilo": {
       rarity: "uncommon",
       image: "images/bombardino crocodilo.png"
@@ -280,17 +216,14 @@ const Cards = {
   },
 
   common: {
-
     "skibidi": {
       rarity: "common",
       image: "images/skibidi.png"
     },
-
     "tripi tropi": {
       rarity: "common",
       image: "images/tripi tropi.png"
     },
-
     "john pork": {
       rarity: "common",
       image: "images/john pork.png"
@@ -310,21 +243,20 @@ function randomCard() {
     Cards.common;
 
   let keys = Object.keys(pool);
-
   let name = keys[Math.floor(Math.random() * keys.length)];
+  let card = pool[name];
 
   return {
     name,
-    rarity: pool[name].rarity,
-    image: pool[name].image
+    rarity: card.rarity,
+    image: card.image,
+    sound: card.sound || null
   };
 }
 
 function openPack() {
 
-  if (coins < 10) {
-    return alert("not enough coins :O");
-  }
+  if (coins < 10) return alert("not enough coins :O");
 
   coins -= 10;
   packs++;
@@ -342,9 +274,9 @@ function openPack() {
     video.style.display = "none";
 
     inventory.push(card);
-
     save();
 
+    // ✅ SOUND FIXED HERE
     if (card.sound) {
       const sound = new Audio(card.sound);
       sound.volume = 0.7;
@@ -364,30 +296,24 @@ function openPack() {
   save();
 }
 
-  
 function renderInventory() {
 
   let div = document.getElementById("inventory");
-
   div.innerHTML = "";
 
   inventory.forEach((c, i) => {
 
     div.innerHTML += `
-
       <div class="cardBox">
 
-        <img src="${c.image}"
-             style="width:180px;border-radius:10px;">
+        <img src="${c.image}" style="width:180px;border-radius:10px;">
 
         <br><br>
 
         <b>${c.name}</b><br>
         ${c.rarity}<br><br>
 
-        <button onclick="sell(${i})">
-          sell
-        </button>
+        <button onclick="sell(${i})">sell</button>
 
         ${c.name === "tung tung tung sahur"
           ? `<button onclick="squish()">squish</button>`
@@ -411,9 +337,7 @@ function sell(i) {
 
   let earned = valueMap[inventory[i].rarity] || 10;
 
-  if (premium) {
-    earned *= 2;
-  }
+  if (premium) earned *= 2;
 
   coins += earned;
 
@@ -425,16 +349,10 @@ function sell(i) {
 }
 
 function squish() {
-
   let v = document.getElementById("squishVideo");
-
   v.style.display = "block";
-
   v.play();
-
-  v.onended = () => {
-    v.style.display = "none";
-  };
+  v.onended = () => v.style.display = "none";
 }
 
 function claimDaily() {
@@ -447,7 +365,6 @@ function claimDaily() {
   }
 
   lastDaily = now;
-
   coins += 100;
 
   save();
@@ -459,32 +376,21 @@ function claimDaily() {
 function updateDailyTimer() {
 
   let now = Date.now();
-
   let remaining = DAILY - (now - lastDaily);
 
   if (remaining <= 0) {
-
     document.getElementById("dailyTimer").innerText = "READY!";
-
     return;
   }
 
-  let hours = Math.floor(remaining / (1000 * 60 * 60));
+  let h = Math.floor(remaining / 3600000);
+  let m = Math.floor((remaining % 3600000) / 60000);
+  let s = Math.floor((remaining % 60000) / 1000);
 
-  let mins = Math.floor(
-    (remaining % (1000 * 60 * 60)) / (1000 * 60)
-  );
-
-  let secs = Math.floor(
-    (remaining % (1000 * 60)) / 1000
-  );
-
-  document.getElementById("dailyTimer").innerText =
-    `${hours}h ${mins}m ${secs}s`;
+  document.getElementById("dailyTimer").innerText = `${h}h ${m}m ${s}s`;
 }
 
 function save() {
-
   localStorage.setItem("inv", JSON.stringify(inventory));
   localStorage.setItem("packs", packs);
   localStorage.setItem("daily", lastDaily);
@@ -492,10 +398,8 @@ function save() {
 }
 
 function updateUI() {
-
   document.getElementById("coins").innerText = coins;
   document.getElementById("count").innerText = packs;
-
   document.getElementById("premiumText").innerText =
     premium ? "premium active" : "";
 
@@ -515,4 +419,3 @@ renderInventory();
 
 </body>
 </html>
-```
