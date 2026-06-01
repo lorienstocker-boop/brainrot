@@ -8,38 +8,79 @@
   <link rel="icon" href="meep (2).ico">
 
   <style>
-  body {
-    margin: 0;
-    font-family: Arial;
-    background: linear-gradient(90deg, #FFD014, #805280);
-    color: white;
-    text-align: center;
-  }
+    body {
+      margin: 0;
+      font-family: Arial;
+      background: linear-gradient(90deg, #FFD014, #805280);
+      color: white;
+      text-align: center;
+    }
 
-  body.premium {
-    background: url("images__1_-removebg-preview.png") center/cover no-repeat;
-  }
+    body.premium {
+      background: url("images__1_-removebg-preview.png") center/cover no-repeat;
+    }
 
-  h1 { margin-top: 20px; }
+    h1 { margin-top: 20px; }
 
-  button {
-    padding: 10px 16px;
-    border: none;
-    border-radius: 10px;
-    cursor: pointer;
-    margin: 5px;
-  }
+    button {
+      padding: 10px 16px;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      margin: 5px;
+    }
 
-  button:hover { transform: scale(1.05); }
+    button:hover { transform: scale(1.05); }
 
-  .cardBox {
-    background: #222;
-    border: 2px solid white;
-    border-radius: 12px;
-    padding: 10px;
-    margin: 10px auto;
-    width: 280px;
-  }
+    #packVideo {
+      width: 300px;
+      border-radius: 12px;
+      display: none;
+      margin: 10px auto;
+    }
+
+    #squishVideo {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 400px;
+      border-radius: 12px;
+      display: none;
+      z-index: 9999;
+      box-shadow: 0 0 30px rgba(0,0,0,0.6);
+    }
+
+    .cardBox {
+      background: #222;
+      border: 2px solid white;
+      border-radius: 12px;
+      padding: 10px;
+      margin: 10px auto;
+      width: 280px;
+    }
+
+    #shelfContainer {
+      width: 700px;
+      margin: 20px auto;
+      position: relative;
+    }
+
+    #shelfImg {
+      width: 100%;
+      display: block;
+    }
+
+    #shelfScroll {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      right: 20px;
+      bottom: 20px;
+      overflow-y: auto;
+      max-height: 300px;
+      padding: 10px;
+    }
   </style>
 </head>
 
@@ -50,20 +91,39 @@
 <button onclick="login()">login</button>
 <button onclick="signup()">signup</button>
 
+<button onclick="openPack()">open pack</button>
+<button onclick="claimDaily()">claim daily pack</button>
+
 <p>coins: <span id="coins">60</span></p>
 <p>packs opened: <span id="count">0</span></p>
 
-<button onclick="openPack()">open pack</button>
+<video id="packVideo" controls>
+  <source src="videos/opening.mp4">
+</video>
+
+<div id="result"></div>
+
+<img id="cardImg" style="max-width:2000px; display:none;">
 
 <h2>inventory</h2>
 <div id="inventory"></div>
+
+<h2>global shelf</h2>
+<div id="shelfContainer">
+  <img id="shelfImg" src="images/shelf.png">
+  <div id="shelfScroll"></div>
+</div>
+
+<video id="squishVideo" controls>
+  <source src="videos/squish.mp4">
+</video>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
 
 
-const supabase = supabase.createClient(
+const supabase = window.supabase.createClient(
   "sb_publishable_gLm5gfbV-rPIDIO3a-Hk8w_Is-xtM2-",
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN1ampxanlkcGpsdnBzdXJvZ295Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAyNTU4MTYsImV4cCI6MjA5NTgzMTgxNn0.7ncfGMpeqC8yGO_DEy6ycx-RzsdUQwmNC_hq4CxVn5U"
 );
@@ -72,15 +132,18 @@ let user = null;
 let coins = 60;
 let inventory = [];
 let packs = 0;
+let lastDaily = 0;
 
-/* AUTH */
+const DAILY = 11 * 60 * 60 * 1000;
+
+
 async function signup() {
   let email = prompt("email");
   let password = prompt("password");
 
   const { error } = await supabase.auth.signUp({ email, password });
 
-  alert(error ? "signup failed" : "account created :3");
+  alert(error ? "signup failed" : "account created");
 }
 
 async function login() {
@@ -101,6 +164,7 @@ async function login() {
 async function loadData() {
   if (!user) return;
 
+
   let { data: profile } = await supabase
     .from("profiles")
     .select("*")
@@ -119,6 +183,7 @@ async function loadData() {
     coins = profile.coins;
   }
 
+
   let { data } = await supabase
     .from("inventory")
     .select("*")
@@ -128,6 +193,7 @@ async function loadData() {
 
   updateUI();
   renderInventory();
+  renderShelf();
 }
 
 
@@ -165,10 +231,29 @@ function openPack() {
 }
 
 
-function updateUI() {
-  document.getElementById("coins").innerText = coins;
-  document.getElementById("count").innerText = packs;
+function claimDaily() {
+  let now = Date.now();
+
+  if (now - lastDaily < DAILY) {
+    alert("come back later");
+    return;
+  }
+
+  lastDaily = now;
+  openPack();
 }
+
+
+function squish() {
+  const video = document.getElementById("squishVideo");
+  video.style.display = "block";
+  video.play();
+
+  video.onended = () => {
+    video.style.display = "none";
+  };
+}
+
 
 function renderInventory() {
   let div = document.getElementById("inventory");
@@ -183,6 +268,25 @@ function renderInventory() {
     `;
   });
 }
+
+
+function renderShelf() {
+  let div = document.getElementById("shelfScroll");
+  if (!div) return;
+
+  div.innerHTML = "";
+
+  inventory.forEach(c => {
+    div.innerHTML += `<div class="cardBox">${c.item_name}</div>`;
+  });
+}
+
+
+function updateUI() {
+  document.getElementById("coins").innerText = coins;
+  document.getElementById("count").innerText = packs;
+}
+
 </script>
 
 </body>
