@@ -20,7 +20,7 @@
   body.premium {
     background: url("images__1_-removebg-preview.png") center/cover no-repeat;
   }
-</style>
+
 
     h1 { margin-top: 20px; }
 
@@ -358,6 +358,17 @@ function renderShelf() {
     div.innerHTML += `<div class="cardBox">${c.name}</div>`;
   });
 }
+
+  let isPremium = false;
+
+  if localStorage.getItem("premium") === true {
+    isPremium = true;
+  }
+
+  if (isPremium) {
+    document.body.classList.add("premium");
+  }
+  
 
 setInterval(() => {
   updateTimer();
