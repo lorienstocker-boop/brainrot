@@ -269,7 +269,8 @@ const Cards = {
 
     "tung tung tung sahur": {
       rarity: "uncommon",
-      image: "images/tung tung tung sahur.png"
+      image: "images/tung tung tung sahur.png",
+      sound: "sound/tung.mp3"
     },
 
     "67": {
@@ -349,6 +350,13 @@ function openPack() {
 
       <img src="${card.image}"
            style="width:220px;border-radius:15px;">
+
+
+  const sound = new Audio(card.sound);
+  sound.volume = 0.7;
+  sound.play();
+
+           
     `;
 
     renderInventory();
