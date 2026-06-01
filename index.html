@@ -19,6 +19,13 @@
   background-size: cover;
 }
 
+    <div id="menu">
+  <h1>brainrot opener</h1>
+
+  <button onclick="startGame()">▶ play</button>
+  <button onclick="buyPremium()">buy premium</button>
+</div>
+
     body.premium {
   background: url("images__1_-removebg-preview.png") center/cover no-repeat;
   background-attachment: fixed;
@@ -61,10 +68,29 @@
       display: none;
       z-index: 9999;
     }
+
+    #menu {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, #FFD014, #805280);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+
+    #menu button {
+    font-size: 20px;
+    margin: 10px;
+
+    #game {
+      display: none;
+    
   </style>
 </head>
 
 <body>
+  <div id="game" style="display:none;">
 
 <h1>brainrot pack opening simulator</h1>
 
@@ -222,6 +248,16 @@ function squish() {
   };
 }
 
+  function startGame() {
+  document.getElementById("menu").style.display = "none";
+  document.getElementById("game").style.display = "block";
+}
+
+function backToMenu() {
+  document.getElementById("menu").style.display = "flex";
+  document.getElementById("game").style.display = "none";
+}
+
 
 function updateUI() {
   document.getElementById("coins").innerText = coins;
@@ -279,7 +315,9 @@ function sell(i) {
 updateUI();
 renderInventory();
 
+
 </script>
 
+</div>
 </body>
 </html>
