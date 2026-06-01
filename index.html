@@ -74,8 +74,23 @@ button {
   cursor: pointer;
 }
 
-button:hover {
-  background: #444;
+  
+body {
+  transition: all 0.3s ease;
+}
+
+
+h1, h2, h3, h4, h5, h6,
+p, span, a, button, li {
+  transition: 0.3s ease;
+}
+
+
+h1:hover, h2:hover, h3:hover, h4:hover, h5:hover, h6:hover,
+p:hover, span:hover, a:hover, button:hover, li:hover {
+  color: #ffd014;
+  text-shadow: 0 0 10px #ffd014, 0 0 20px #ff8c00;
+  transform: scale(1.05);
 }
 
 
