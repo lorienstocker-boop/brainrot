@@ -96,6 +96,14 @@
 
 <h1>brainrot pack opening simulator</h1>
 
+<button onclick="buyWallpaperPack()">
+buy premium!($2.50)
+</button>
+
+<button onclick="redeemCode()">
+redeem code
+</button>
+
 <p>packs opened: <span id="count">0</span></p>
 <p id="timer"></p>
 
@@ -174,6 +182,36 @@ function randomCard() {
   let keys = Object.keys(pool);
   let name = keys[Math.floor(Math.random() * keys.length)];
   return { name, rarity: pool[name] };
+}
+
+  function buyWallpaperPack() {
+  window.open("https://lorienstox.gumroad.com/l/attrhu", "_blank");
+}
+
+  function redeemCode() {
+
+  let code = prompt("Enter your code:");
+
+  if (!code) return;
+
+  code = code.trim().toUpperCase();
+
+  if (code === "BRAINROT2026") {
+
+    wallpapers.push("premium_wall.jpg");
+
+    localStorage.setItem(
+      "walls",
+      JSON.stringify(wallpapers)
+    );
+
+    alert("Premium wallpaper unlocked!");
+
+  } else {
+
+    alert("Invalid code");
+
+  }
 }
 
 function value(r) {
