@@ -19,17 +19,39 @@
   text-shadow: 0 0 10px rgba(255,255,255,0.6);
 }
 
- html, body {
+html, body {
   margin: 0;
   width: 100%;
   height: 100%;
+
+  font-family: Arial;
+  text-align: center;
+  color: white;
 }
 
-body {
-  background-image: url("apple.png");
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
+body.menu {
+  background: url("apple.png") center/cover no-repeat fixed;
+}
+
+body.game {
+  background: linear-gradient(90deg, #FFD014, #805280);
+}
+
+body.premium {
+  background: url("premium-bg.png") center/cover no-repeat fixed;
+}
+
+#menu {
+  position: fixed;
+  inset: 0;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  background: rgba(0,0,0,0.35);
+  backdrop-filter: blur(4px);
 }
 
 button {
@@ -89,6 +111,7 @@ button:hover { transform: scale(1.05); }
 <p id="premiumText"></p>
 
 <p>coins: <span id="coins">60</span></p>
+<p>next daily pack in: <span id="dailyTimer"></span></p>
 <p>packs opened: <span id="count">0</span></p>
 
 <button onclick="openPack()">open pack</button>
@@ -164,40 +187,84 @@ function openPack() {
     inventory.push(card);
     save();
 
-    document.getElementById("result").innerText =
-      `You got ${card.name} (${card.rarity})`;
+document.getElementById("result").innerHTML = `
+  <h2>You got ${card.name} (${card.rarity})</h2>
 
-    renderInventory();
-    updateUI();
-  };
-
-  updateUI();
-  save();
-}
+  <img src="${card.image}"
+       style="width:220px;border-radius:15px;">
+`;
 
 
 const Cards = {
-  epic: { "tralalero tralala": "epic" },
-  insane: { "apple pen dude": "insane" },
+  epic: {
+    "tralalero tralala": {
+      rarity: "epic",
+      image: "images/tralala.png"
+    }
+  },
+
+  insane: {
+    "apple pen dude": {
+      rarity: "insane",
+      image: "images/apple pen dude.png"
+    }
+  },
+
   rare: {
-    "ballerina cappucina": "rare",
-    "cappucino assassino": "rare",
-    "tim cheese": "rare"
+    "ballerina cappucina": {
+      rarity: "rare",
+      image: "images/ballerina cappucina.png"
+    },
+
+    "cappucino assassino": {
+      rarity: "rare",
+      image: "images/cappucino assassino.png"
+    },
+
+    "tim cheese": {
+      rarity: "rare",
+      image: "images/tim cheese.png"
+    }
   },
+
   uncommon: {
-    "bombardino crocodilo": "uncommon",
-    "tung tung tung sahur": "uncommon",
-    "67": "uncommon"
+    "bombardino crocodilo": {
+      rarity: "uncommon",
+      image: "images/bombardino crocodilo.png"
+    },
+
+    "tung tung tung sahur": {
+      rarity: "uncommon",
+      image: "images/tung tung tung sahur.png"
+    },
+
+    "67": {
+      rarity: "uncommon",
+      image: "images/67.png"
+    }
   },
+
   common: {
-    "skibidi": "common",
-    "tripi tropi": "common",
-    "john pork": "common"
+    "skibidi": {
+      rarity: "common",
+      image: "images/skibidi.png"
+    },
+
+    "tripi tropi": {
+      rarity: "common",
+      image: "images/tripi tropi.png"
+    },
+
+    "john pork": {
+      rarity: "common",
+      image: "images/john pork.png"
+    }
   }
 };
 
 function randomCard() {
   let r = Math.random();
+
   let pool =
     r < 0.03 ? Cards.insane :
     r < 0.08 ? Cards.epic :
@@ -207,7 +274,12 @@ function randomCard() {
 
   let keys = Object.keys(pool);
   let name = keys[Math.floor(Math.random() * keys.length)];
-  return { name, rarity: pool[name] };
+
+  return {
+    name,
+    rarity: pool[name].rarity,
+    image: pool[name].image
+  };
 }
 
 
@@ -225,6 +297,24 @@ function renderInventory() {
       </div>
     `;
   });
+}
+
+    function claimDaily() {
+
+  let now = Date.now();
+
+  if (now - lastDaily < DAILY) {
+    alert("daily pack not ready yet");
+    return;
+  }
+
+  lastDaily = now;
+  coins += 30;
+
+  save();
+  updateUI();
+
+  alert("daily reward claimed! +30 coins");
 }
 
 
@@ -269,6 +359,27 @@ function updateUI() {
 
   if (premium) document.body.classList.add("premium");
 }
+
+    function updateDailyTimer() {
+
+  let now = Date.now();
+  let remaining = DAILY - (now - lastDaily);
+
+  if (remaining <= 0) {
+    document.getElementById("dailyTimer").innerText = "READY!";
+    return;
+  }
+
+  let hours = Math.floor(remaining / (1000 * 60 * 60));
+  let mins = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
+  let secs = Math.floor((remaining % (1000 * 60)) / 1000);
+
+  document.getElementById("dailyTimer").innerText =
+    `${hours}h ${mins}m ${secs}s`;
+}
+
+setInterval(updateDailyTimer, 1000);
+updateDailyTimer();
 
 
 updateUI();
