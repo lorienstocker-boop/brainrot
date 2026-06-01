@@ -32,24 +32,6 @@
 
     button:hover { transform: scale(1.05); }
 
-    #packVideo {
-      width: 300px;
-      border-radius: 12px;
-      display: none;
-      margin: 10px auto;
-    }
-
-    #squishVideo {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      width: 400px;
-      border-radius: 12px;
-      display: none;
-      z-index: 9999;
-    }
-
     .cardBox {
       background: #222;
       border: 2px solid white;
@@ -65,11 +47,6 @@
       position: relative;
     }
 
-    #shelfImg {
-      width: 100%;
-      display: block;
-    }
-
     #shelfScroll {
       position: absolute;
       top: 20px;
@@ -79,6 +56,20 @@
       overflow-y: auto;
       max-height: 300px;
       padding: 10px;
+    }
+
+    #packVideo, #squishVideo {
+      display: none;
+      margin: 10px auto;
+    }
+
+    #squishVideo {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 400px;
+      z-index: 9999;
     }
   </style>
 </head>
@@ -98,21 +89,13 @@
 <button onclick="openPack()">open pack</button>
 <button onclick="claimDaily()">claim daily pack</button>
 
-<video id="packVideo" controls>
-  <source src="videos/opening.mp4">
-</video>
-
 <div id="result"></div>
-
-<img id="cardImg" style="max-width:2000px; display:none;">
 
 <h2>inventory</h2>
 <div id="inventory"></div>
 
 <h2>global shelf</h2>
-
 <div id="shelfContainer">
-  <img id="shelfImg" src="images/shelf.png">
   <div id="shelfScroll"></div>
 </div>
 
@@ -125,10 +108,16 @@
 <script>
 
 
-const supabase = window.supabase.createClient(
-  "YOUR_SUPABASE_URL",
-  "YOUR_SUPABASE_ANON_KEY"
-);
+let supabase = null;
+
+try {
+  supabase = window.supabase.createClient(
+    "YOUR_SUPABASE_URL",
+    "YOUR_SUPABASE_ANON_KEY"
+  );
+} catch (e) {
+  console.log("Supabase not available, running offline mode");
+}
 
 
 let packs = parseInt(localStorage.getItem("packs")) || 0;
@@ -137,10 +126,9 @@ let lastDaily = parseInt(localStorage.getItem("daily")) || 0;
 let coins = parseInt(localStorage.getItem("coins")) || 60;
 let premium = localStorage.getItem("premium") === "true";
 
-const DAILY = 11 * 60 * 60 * 1000;
-
-
 let globalInventory = [];
+
+const DAILY = 11 * 60 * 60 * 1000;
 
 
 const Cards = {
@@ -163,6 +151,7 @@ const Cards = {
   }
 };
 
+
 function randomCard() {
   let r = Math.random();
   let pool =
@@ -177,7 +166,6 @@ function randomCard() {
   return { name, rarity: pool[name] };
 }
 
-
 function save() {
   localStorage.setItem("inv", JSON.stringify(inventory));
   localStorage.setItem("packs", packs);
@@ -191,14 +179,21 @@ function buyPremium() {
   window.open("https://your-gumroad-link.com", "_blank");
 }
 
-async function loadShelf() {
-  let { data } = await supabase
-    .from("inventory")
-    .select("*")
-    .order("id", { ascending: false });
 
-  globalInventory = data || [];
-  renderShelf();
+async function loadShelf() {
+  if (!supabase) return;
+
+  try {
+    let { data } = await supabase
+      .from("inventory")
+      .select("*")
+      .order("id", { ascending: false });
+
+    globalInventory = data || [];
+    renderShelf();
+  } catch (e) {
+    console.log("shelf error", e);
+  }
 }
 
   
@@ -212,13 +207,13 @@ function openPack() {
   let card = randomCard();
 
   let video = document.getElementById("packVideo");
-  video.style.display = "block";
-  video.currentTime = 0;
-  video.play();
+  if (video) {
+    video.style.display = "block";
+    video.currentTime = 0;
+    video.play();
+  }
 
-  video.onended = () => {
-
-    video.style.display = "none";
+  setTimeout(() => {
 
     inventory.push(card);
     save();
@@ -229,12 +224,14 @@ function openPack() {
     document.getElementById("result").innerText =
       `You got ${card.name} (${card.rarity})`;
 
-    
-    supabase.from("inventory").insert({
-      item_name: card.name,
-      rarity: card.rarity
-    }).then(loadShelf);
-  };
+    if (supabase) {
+      supabase.from("inventory").insert({
+        item_name: card.name,
+        rarity: card.rarity
+      }).then(() => loadShelf());
+    }
+
+  }, 1200);
 
   updateUI();
   save();
@@ -271,6 +268,10 @@ function updateUI() {
   document.getElementById("coins").innerText = coins;
   document.getElementById("premiumText").innerText =
     premium ? "premium active :3" : "";
+
+  if (premium) {
+    document.body.classList.add("premium");
+  }
 }
 
 function renderInventory() {
@@ -297,6 +298,8 @@ function renderInventory() {
 
 function renderShelf() {
   let div = document.getElementById("shelfScroll");
+  if (!div) return;
+
   div.innerHTML = "";
 
   globalInventory.forEach(c => {
