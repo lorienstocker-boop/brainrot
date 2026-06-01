@@ -32,6 +32,24 @@
 
     button:hover { transform: scale(1.05); }
 
+    #packVideo {
+      width: 300px;
+      border-radius: 12px;
+      display: none;
+      margin: 10px auto;
+    }
+
+    #squishVideo {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 400px;
+      border-radius: 12px;
+      display: none;
+      z-index: 9999;
+    }
+
     .cardBox {
       background: #222;
       border: 2px solid white;
@@ -57,20 +75,6 @@
       max-height: 300px;
       padding: 10px;
     }
-
-    #packVideo, #squishVideo {
-      display: none;
-      margin: 10px auto;
-    }
-
-    #squishVideo {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      width: 400px;
-      z-index: 9999;
-    }
   </style>
 </head>
 
@@ -78,19 +82,30 @@
 
 <h1>brainrot pack opening simulator</h1>
 
-<button onclick="login()">login</button>
-<button onclick="signup()">signup</button>
+<button onclick="buyPremium()">buy premium</button>
+<button onclick="redeemCode()">redeem code</button>
+
+<p id="premiumText"></p>
+
+<p>coins: <span id="coins">60</span></p>
+<p>packs opened: <span id="count">0</span></p>
 
 <button onclick="openPack()">open pack</button>
 <button onclick="claimDaily()">claim daily pack</button>
 
-<p>coins: <span id="coins">60</span></p>
-<p>packs opened: <span id="count">0</span></p>
+<video id="packVideo" controls>
+  <source src="videos/opening.mp4">
+</video>
+
+<div id="result"></div>
+
+<img id="cardImg" style="max-width:2000px; display:none;">
 
 <h2>inventory</h2>
 <div id="inventory"></div>
 
 <h2>global shelf</h2>
+
 <div id="shelfContainer">
   <div id="shelfScroll"></div>
 </div>
@@ -99,116 +114,109 @@
   <source src="videos/squish.mp4">
 </video>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
 <script>
 
-
-const supabase = window.supabase.createClient(
-  "sb_publishable_gLm5gfbV-rPIDIO3a-Hk8w_Is-xtM2-",
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN1ampxanlkcGpsdnBzdXJvZ295Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAyNTU4MTYsImV4cCI6MjA5NTgzMTgxNn0.7ncfGMpeqC8yGO_DEy6ycx-RzsdUQwmNC_hq4CxVn5U"
-);
-
-
-let user = null;
-let coins = 60;
-let inventory = [];
-let packs = 0;
-let lastDaily = 0;
+let packs = parseInt(localStorage.getItem("packs")) || 0;
+let inventory = JSON.parse(localStorage.getItem("inv") || "[]");
+let lastDaily = parseInt(localStorage.getItem("daily")) || 0;
+let coins = parseInt(localStorage.getItem("coins")) || 60;
+let premium = localStorage.getItem("premium") === "true";
 
 const DAILY = 11 * 60 * 60 * 1000;
 
+document.getElementById("count").innerText = packs;
 
-async function signup() {
-  let email = prompt("email");
-  let password = prompt("password");
-
-  const { error } = await supabase.auth.signUp({ email, password });
-
-  alert(error ? "signup failed" : "account created");
-}
-
-async function login() {
-  let email = prompt("email");
-  let password = prompt("password");
-
-  const { data, error } =
-    await supabase.auth.signInWithPassword({ email, password });
-
-  if (error) return alert("login failed :O");
-
-  user = data.user;
-
-  await loadData();
-}
-
-
-async function loadData() {
-  if (!user) return;
-
-  let { data: profile } = await supabase
-    .from("profiles")
-    .select("*")
-    .eq("id", user.id)
-    .maybeSingle();
-
-  if (!profile) {
-    await supabase.from("profiles").insert({
-      id: user.id,
-      coins: 60,
-      premium: false
-    });
-
-    coins = 60;
-  } else {
-    coins = profile.coins;
+const Cards = {
+  epic: { "tralalero tralala": "epic" },
+  insane: { "apple pen dude": "insane" },
+  rare: {
+    "ballerina cappucina": "rare",
+    "cappucino assassino": "rare",
+    "tim cheese": "rare"
+  },
+  uncommon: {
+    "bombardino crocodilo": "uncommon",
+    "tung tung tung sahur": "uncommon",
+    "67": "uncommon"
+  },
+  common: {
+    "skibidi": "common",
+    "tripi tropi": "common",
+    "john pork": "common"
   }
+};
 
-  let { data } = await supabase
-    .from("inventory")
-    .select("*")
-    .eq("user_id", user.id);
+function randomCard() {
+  let r = Math.random();
+  let pool =
+    r < 0.03 ? Cards.insane :
+    r < 0.08 ? Cards.epic :
+    r < 0.18 ? Cards.rare :
+    r < 0.58 ? Cards.uncommon :
+    Cards.common;
 
-  inventory = data || [];
+  let keys = Object.keys(pool);
+  let name = keys[Math.floor(Math.random() * keys.length)];
+  return { name, rarity: pool[name] };
+}
 
+function save() {
+  localStorage.setItem("inv", JSON.stringify(inventory));
+  localStorage.setItem("packs", packs);
+  localStorage.setItem("daily", lastDaily);
+  localStorage.setItem("coins", coins);
+  localStorage.setItem("premium", premium);
+}
+
+function buyPremium() {
+  premium = true;
+  save();
   updateUI();
-  renderInventory();
-  renderShelf();
 }
 
-
-async function saveCoins() {
-  if (!user) return;
-
-  await supabase
-    .from("profiles")
-    .update({ coins })
-    .eq("id", user.id);
+function redeemCode() {
+  let code = prompt("Enter code:");
+  if (code === "BRAINROT2026") {
+    premium = true;
+    save();
+    updateUI();
+    alert("premium unlocked!");
+  } else {
+    alert("invalid code");
+  }
 }
 
-  
 function openPack() {
-  if (!user) return alert("login first");
+
   if (coins < 10) return alert("not enough coins");
 
   coins -= 10;
   packs++;
 
-  saveCoins();
-  updateUI();
+  let card = randomCard();
 
-  let card = {
-    name: "skibidi",
-    rarity: "common"
+  let video = document.getElementById("packVideo");
+  video.style.display = "block";
+  video.currentTime = 0;
+  video.play();
+
+  video.onended = () => {
+
+    video.style.display = "none";
+
+    inventory.push(card);
+    save();
+
+    renderInventory();
+    renderShelf();
+
+    document.getElementById("result").innerText =
+      `You got ${card.name} (${card.rarity})`;
   };
 
-  supabase.from("inventory").insert({
-    user_id: user.id,
-    item_name: card.name,
-    rarity: card.rarity
-  }).then(loadData);
+  updateUI();
+  save();
 }
-
 
 function claimDaily() {
   let now = Date.now();
@@ -219,13 +227,12 @@ function claimDaily() {
   }
 
   lastDaily = now;
+  save();
   openPack();
 }
 
-
 function squish() {
   const video = document.getElementById("squishVideo");
-
   video.style.display = "block";
   video.currentTime = 0;
   video.play();
@@ -235,21 +242,47 @@ function squish() {
   };
 }
 
+function value(r) {
+  return { common:4, uncommon:20, rare:80, epic:300, insane:600 }[r] || 10;
+}
+
+function sell(i) {
+  let earned = value(inventory[i].rarity);
+
+  if (premium) earned *= 2;
+
+  coins += earned;
+  inventory.splice(i, 1);
+
+  save();
+  updateUI();
+  renderInventory();
+  renderShelf();
+}
 
 function updateUI() {
   document.getElementById("coins").innerText = coins;
-  document.getElementById("count").innerText = packs;
+  document.getElementById("premiumText").innerText =
+    premium ? "premium active :3" : "";
 }
 
 function renderInventory() {
   let div = document.getElementById("inventory");
   div.innerHTML = "";
 
-  inventory.forEach(c => {
+  inventory.forEach((c, i) => {
+
+    let btn = `<button onclick="sell(${i})">sell</button>`;
+
+    if (c.name === "tung tung tung sahur") {
+      btn += `<button onclick="squish()">squish</button>`;
+    }
+
     div.innerHTML += `
       <div class="cardBox">
-        <b>${c.item_name}</b><br>
-        ${c.rarity}
+        <b>${c.name}</b><br>
+        ${c.rarity}<br>
+        ${btn}
       </div>
     `;
   });
@@ -260,9 +293,13 @@ function renderShelf() {
   div.innerHTML = "";
 
   inventory.forEach(c => {
-    div.innerHTML += `<div class="cardBox">${c.item_name}</div>`;
+    div.innerHTML += `<div class="cardBox">${c.name}</div>`;
   });
 }
+
+updateUI();
+renderInventory();
+renderShelf();
 
 </script>
 
