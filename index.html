@@ -32,25 +32,6 @@
 
     button:hover { transform: scale(1.05); }
 
-    #packVideo {
-      width: 300px;
-      border-radius: 12px;
-      display: none;
-      margin: 10px auto;
-    }
-
-    #squishVideo {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      width: 400px;
-      border-radius: 12px;
-      display: none;
-      z-index: 9999;
-      box-shadow: 0 0 30px rgba(0,0,0,0.6);
-    }
-
     .cardBox {
       background: #222;
       border: 2px solid white;
@@ -66,11 +47,6 @@
       position: relative;
     }
 
-    #shelfImg {
-      width: 100%;
-      display: block;
-    }
-
     #shelfScroll {
       position: absolute;
       top: 20px;
@@ -80,6 +56,20 @@
       overflow-y: auto;
       max-height: 300px;
       padding: 10px;
+    }
+
+    #packVideo, #squishVideo {
+      display: none;
+      margin: 10px auto;
+    }
+
+    #squishVideo {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 400px;
+      z-index: 9999;
     }
   </style>
 </head>
@@ -97,20 +87,11 @@
 <p>coins: <span id="coins">60</span></p>
 <p>packs opened: <span id="count">0</span></p>
 
-<video id="packVideo" controls>
-  <source src="videos/opening.mp4">
-</video>
-
-<div id="result"></div>
-
-<img id="cardImg" style="max-width:2000px; display:none;">
-
 <h2>inventory</h2>
 <div id="inventory"></div>
 
 <h2>global shelf</h2>
 <div id="shelfContainer">
-  <img id="shelfImg" src="images/shelf.png">
   <div id="shelfScroll"></div>
 </div>
 
@@ -127,6 +108,7 @@ const supabase = window.supabase.createClient(
   "sb_publishable_gLm5gfbV-rPIDIO3a-Hk8w_Is-xtM2-",
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN1ampxanlkcGpsdnBzdXJvZ295Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAyNTU4MTYsImV4cCI6MjA5NTgzMTgxNn0.7ncfGMpeqC8yGO_DEy6ycx-RzsdUQwmNC_hq4CxVn5U"
 );
+
 
 let user = null;
 let coins = 60;
@@ -153,7 +135,7 @@ async function login() {
   const { data, error } =
     await supabase.auth.signInWithPassword({ email, password });
 
-  if (error) return alert("login failed");
+  if (error) return alert("login failed :O");
 
   user = data.user;
 
@@ -163,7 +145,6 @@ async function login() {
 
 async function loadData() {
   if (!user) return;
-
 
   let { data: profile } = await supabase
     .from("profiles")
@@ -182,7 +163,6 @@ async function loadData() {
   } else {
     coins = profile.coins;
   }
-
 
   let { data } = await supabase
     .from("inventory")
@@ -206,10 +186,9 @@ async function saveCoins() {
     .eq("id", user.id);
 }
 
-
+  
 function openPack() {
   if (!user) return alert("login first");
-
   if (coins < 10) return alert("not enough coins");
 
   coins -= 10;
@@ -246,7 +225,9 @@ function claimDaily() {
 
 function squish() {
   const video = document.getElementById("squishVideo");
+
   video.style.display = "block";
+  video.currentTime = 0;
   video.play();
 
   video.onended = () => {
@@ -254,6 +235,11 @@ function squish() {
   };
 }
 
+
+function updateUI() {
+  document.getElementById("coins").innerText = coins;
+  document.getElementById("count").innerText = packs;
+}
 
 function renderInventory() {
   let div = document.getElementById("inventory");
@@ -269,22 +255,13 @@ function renderInventory() {
   });
 }
 
-
 function renderShelf() {
   let div = document.getElementById("shelfScroll");
-  if (!div) return;
-
   div.innerHTML = "";
 
   inventory.forEach(c => {
     div.innerHTML += `<div class="cardBox">${c.item_name}</div>`;
   });
-}
-
-
-function updateUI() {
-  document.getElementById("coins").innerText = coins;
-  document.getElementById("count").innerText = packs;
 }
 
 </script>
