@@ -108,6 +108,7 @@
 
 <div id="shelfContainer">
   <div id="shelfScroll"></div>
+  <img id="shelfImg" src="images/shelf.png">
 </div>
 
 <video id="squishVideo" controls>
@@ -169,9 +170,7 @@ function save() {
 }
 
 function buyPremium() {
-  premium = true;
-  save();
-  updateUI();
+  window.open("https://your-gumroad-link-here.com", "_blank");
 }
 
 function redeemCode() {
@@ -264,6 +263,10 @@ function updateUI() {
   document.getElementById("coins").innerText = coins;
   document.getElementById("premiumText").innerText =
     premium ? "premium active :3" : "";
+
+  if (premium) {
+  document.body.classList.add("premium");
+}
 }
 
 function renderInventory() {
