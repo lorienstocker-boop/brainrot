@@ -65,6 +65,11 @@
       position: relative;
     }
 
+    #shelfImg {
+      width: 100%;
+      display: block;
+    }
+
     #shelfScroll {
       position: absolute;
       top: 20px;
@@ -107,15 +112,24 @@
 <h2>global shelf</h2>
 
 <div id="shelfContainer">
-  <div id="shelfScroll"></div>
   <img id="shelfImg" src="images/shelf.png">
+  <div id="shelfScroll"></div>
 </div>
 
 <video id="squishVideo" controls>
   <source src="videos/squish.mp4">
 </video>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <script>
+
+
+const supabase = window.supabase.createClient(
+  "YOUR_SUPABASE_URL",
+  "YOUR_SUPABASE_ANON_KEY"
+);
+
 
 let packs = parseInt(localStorage.getItem("packs")) || 0;
 let inventory = JSON.parse(localStorage.getItem("inv") || "[]");
@@ -125,7 +139,9 @@ let premium = localStorage.getItem("premium") === "true";
 
 const DAILY = 11 * 60 * 60 * 1000;
 
-document.getElementById("count").innerText = packs;
+
+let globalInventory = [];
+
 
 const Cards = {
   epic: { "tralalero tralala": "epic" },
@@ -161,6 +177,7 @@ function randomCard() {
   return { name, rarity: pool[name] };
 }
 
+
 function save() {
   localStorage.setItem("inv", JSON.stringify(inventory));
   localStorage.setItem("packs", packs);
@@ -169,22 +186,22 @@ function save() {
   localStorage.setItem("premium", premium);
 }
 
+
 function buyPremium() {
-  window.open("https://lorienstox.gumroad.com/l/attrhu", "_blank");
+  window.open("https://your-gumroad-link.com", "_blank");
 }
 
-function redeemCode() {
-  let code = prompt("Enter code:");
-  if (code === "BRAINROT2026") {
-    premium = true;
-    save();
-    updateUI();
-    alert("premium unlocked!");
-  } else {
-    alert("invalid code");
-  }
+async function loadShelf() {
+  let { data } = await supabase
+    .from("inventory")
+    .select("*")
+    .order("id", { ascending: false });
+
+  globalInventory = data || [];
+  renderShelf();
 }
 
+  
 function openPack() {
 
   if (coins < 10) return alert("not enough coins");
@@ -211,11 +228,18 @@ function openPack() {
 
     document.getElementById("result").innerText =
       `You got ${card.name} (${card.rarity})`;
+
+    
+    supabase.from("inventory").insert({
+      item_name: card.name,
+      rarity: card.rarity
+    }).then(loadShelf);
   };
 
   updateUI();
   save();
 }
+
 
 function claimDaily() {
   let now = Date.now();
@@ -230,6 +254,7 @@ function claimDaily() {
   openPack();
 }
 
+
 function squish() {
   const video = document.getElementById("squishVideo");
   video.style.display = "block";
@@ -241,32 +266,11 @@ function squish() {
   };
 }
 
-function value(r) {
-  return { common:4, uncommon:20, rare:80, epic:300, insane:600 }[r] || 10;
-}
-
-function sell(i) {
-  let earned = value(inventory[i].rarity);
-
-  if (premium) earned *= 2;
-
-  coins += earned;
-  inventory.splice(i, 1);
-
-  save();
-  updateUI();
-  renderInventory();
-  renderShelf();
-}
 
 function updateUI() {
   document.getElementById("coins").innerText = coins;
   document.getElementById("premiumText").innerText =
     premium ? "premium active :3" : "";
-
-  if (premium) {
-  document.body.classList.add("premium");
-}
 }
 
 function renderInventory() {
@@ -295,14 +299,33 @@ function renderShelf() {
   let div = document.getElementById("shelfScroll");
   div.innerHTML = "";
 
-  inventory.forEach(c => {
-    div.innerHTML += `<div class="cardBox">${c.name}</div>`;
+  globalInventory.forEach(c => {
+    div.innerHTML += `<div class="cardBox">${c.item_name}</div>`;
   });
 }
 
+
+function value(r) {
+  return { common:4, uncommon:20, rare:80, epic:300, insane:600 }[r] || 10;
+}
+
+function sell(i) {
+  let earned = value(inventory[i].rarity);
+
+  if (premium) earned *= 2;
+
+  coins += earned;
+  inventory.splice(i, 1);
+
+  save();
+  updateUI();
+  renderInventory();
+}
+
+
 updateUI();
 renderInventory();
-renderShelf();
+loadShelf();
 
 </script>
 
