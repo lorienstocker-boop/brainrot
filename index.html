@@ -77,16 +77,16 @@ button:hover { transform: scale(1.05); }
 <div id="menu">
   <h1>brainrot opener</h1>
   <button onclick="startGame()">play</button>
-  <button onclick="buyPremium()">buy premium</button>
+  <button onclick="buyPremium()">buy premium :3</button>
 </div>
 
 
 <div id="game">
 
-<h1>brainrot pack opening simulator</h1>
+<h1>brainrot pack opening simulator :3 BLEHH!!</h1>
 
-<button onclick="buyPremium()">buy premium</button>
-<button onclick="redeemCode()">redeem code</button>
+<button onclick="buyPremium()">buy premium :3</button>
+<button onclick="redeemCode()">redeem code :3</button>
 
 <p id="premiumText"></p>
 
@@ -147,7 +147,7 @@ function redeemCode() {
 
 
 function openPack() {
-  if (coins < 10) return alert("not enough coins");
+  if (coins < 10) return alert("not enough coins :O");
 
   coins -= 10;
   packs++;
@@ -160,29 +160,20 @@ function openPack() {
   video.play();
 
   video.onended = () => {
-  video.style.display = "none";
+    video.style.display = "none";
 
-  inventory.push(card);
-  save();
+    inventory.push(card);
+    save();
 
-  document.getElementById("result").innerText =
-    `You got ${card.name} (${card.rarity})`;
+    document.getElementById("result").innerText =
+      `You got ${card.name} (${card.rarity})`;
 
-  renderInventory();
+    renderInventory();
+    updateUI();
+  };
+
   updateUI();
-}
-
-function claimDaily() {
-  let now = Date.now();
-
-  if (now - lastDaily < DAILY) {
-    alert("come back later");
-    return;
-  }
-
-  lastDaily = now;
   save();
-  openPack();
 }
 
 
