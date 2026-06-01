@@ -96,6 +96,8 @@
 
 <h1>brainrot pack opening simulator</h1>
 
+<p id="premiumText"></p>
+
 <button onclick="buyWallpaperPack()">
 buy premium!($2.50)
 </button>
@@ -147,6 +149,7 @@ let packs = parseInt(localStorage.getItem("packs")) || 0;
 let inventory = JSON.parse(localStorage.getItem("inv") || "[]");
 let lastDaily = parseInt(localStorage.getItem("daily")) || 0;
 let coins = parseInt(localStorage.getItem("coins")) || 60;
+let premium = localStorage.getItem("premium") === "true";
 
 document.getElementById("count").innerText = packs;
 
@@ -198,14 +201,9 @@ function randomCard() {
 
   if (code === "BRAINROT2026") {
 
-    wallpapers.push("premium_wall.jpg");
+    localStorage.setItem("premium", "true");
 
-    localStorage.setItem(
-      "walls",
-      JSON.stringify(wallpapers)
-    );
-
-    alert("Premium wallpaper unlocked!");
+    alert("premium unlocked!, sell value is now 2x!");
 
   } else {
 
@@ -221,6 +219,9 @@ function value(r) {
 function updateUI() {
   document.getElementById("coins").innerText = coins;
   document.getElementById("count").innerText = packs;
+
+  document.getElementById("premiumText").innerText =
+    premium ? "⭐ PREMIUM ACTIVE (2x sell coins)" : "";
 }
 
 function save() {
@@ -252,7 +253,13 @@ function renderInventory() {
 }
 
 function sell(i) {
-  coins += value(inventory[i].rarity);
+  let earned = value(inventory[i].rarity);
+
+if (premium) {
+  earned *= 2;
+}
+
+coins += earned;
   inventory.splice(i,1);
   save();
   updateUI();
