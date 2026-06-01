@@ -62,7 +62,8 @@
 
 <script>
 
-const supabase = window.supabase.createClient(
+
+const supabase = supabase.createClient(
   "sb_publishable_gLm5gfbV-rPIDIO3a-Hk8w_Is-xtM2-",
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN1ampxanlkcGpsdnBzdXJvZ295Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAyNTU4MTYsImV4cCI6MjA5NTgzMTgxNn0.7ncfGMpeqC8yGO_DEy6ycx-RzsdUQwmNC_hq4CxVn5U"
 );
@@ -72,7 +73,7 @@ let coins = 60;
 let inventory = [];
 let packs = 0;
 
-
+/* AUTH */
 async function signup() {
   let email = prompt("email");
   let password = prompt("password");
@@ -98,12 +99,13 @@ async function login() {
 
 
 async function loadData() {
-  // PROFILE
+  if (!user) return;
+
   let { data: profile } = await supabase
     .from("profiles")
     .select("*")
     .eq("id", user.id)
-    .single();
+    .maybeSingle();
 
   if (!profile) {
     await supabase.from("profiles").insert({
@@ -116,7 +118,6 @@ async function loadData() {
   } else {
     coins = profile.coins;
   }
-
 
   let { data } = await supabase
     .from("inventory")
@@ -139,7 +140,7 @@ async function saveCoins() {
     .eq("id", user.id);
 }
 
-  
+
 function openPack() {
   if (!user) return alert("login first");
 
