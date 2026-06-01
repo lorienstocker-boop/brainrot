@@ -275,16 +275,10 @@ function squish() {
   };
 }
 
-  function startGame() {
+  window.startGame = function () {
   document.getElementById("menu").style.display = "none";
   document.getElementById("game").style.display = "block";
-}
-
-function backToMenu() {
-  document.getElementById("menu").style.display = "flex";
-  document.getElementById("game").style.display = "none";
-}
-
+};
 
 function updateUI() {
   document.getElementById("coins").innerText = coins;
