@@ -7,17 +7,33 @@
 
   <link rel="icon" href="meep (2).ico">
 
-  <style>
-    body {
-  margin: 0;
-  font-family: Arial;
-  color: white;
-  text-align: center;
+  
+    
+    <body>
 
-  background: linear-gradient(90deg, #FFD014, #805280);
-  background-attachment: fixed;
-  background-size: cover;
-}
+<div id="menu">
+  <h1>brainrot opener</h1>
+
+  <button onclick="startGame()">play</button>
+  <button onclick="buyPremium()">buy premium</button>
+</div>
+
+
+<div id="game" style="display:none;">
+
+  <h1>brainrot pack opening simulator</h1>
+
+  <button onclick="openPack()">open pack</button>
+  <button onclick="claimDaily()">claim daily pack</button>
+
+  <p>coins: <span id="coins">60</span></p>
+  <p id="premiumText"></p>
+
+  <div id="inventory"></div>
+
+</div>
+
+</body>
 
   <div id="menu">
   <h1>brainrot opener</h1>
@@ -25,6 +41,8 @@
   <button onclick="startGame()">play</button>
   <button onclick="buyPremium()">buy premium</button>
   </div>
+
+   <style>
 
     body.premium {
   background: url("images__1_-removebg-preview.png") center/cover no-repeat;
@@ -70,21 +88,30 @@
     }
 
     #menu {
-    position: fixed;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, #FFD014, #805280);
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 
-    #menu button {
-    font-size: 20px;
-    margin: 10px;
+  background: linear-gradient(90deg, #FFD014, #805280);
+  z-index: 9999;
+}
 
-    #game {
-      display: none;
+#menu h1 {
+  font-size: 40px;
+  margin-bottom: 20px;
+}
+
+#menu button {
+  font-size: 20px;
+  margin: 10px;
+}
+
+#game {
+  display: none;
+}
     
   </style>
 </head>
