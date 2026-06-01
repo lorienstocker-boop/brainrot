@@ -127,7 +127,7 @@ p:hover, span:hover, a:hover, button:hover, li:hover {
 <body class="menu">
 
 <div id="menu">
-  <h1>brainrot opener</h1>
+  <h1 style="color: red">brainrot opener</h1>
 
   <button onclick="startGame()">play</button>
 
@@ -491,7 +491,7 @@ function updateUI() {
   document.getElementById("count").innerText = packs;
 
   document.getElementById("premiumText").innerText =
-    premium ? "premium active"
+    premium ? "premium active" : "";
 
   if (premium) {
     document.body.classList.remove("game");
