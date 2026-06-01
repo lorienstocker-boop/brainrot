@@ -345,18 +345,15 @@ function openPack() {
 
     save();
 
+    if (card.sound) {
+      const sound = new Audio(card.sound);
+      sound.volume = 0.7;
+      sound.play();
+    }
+
     document.getElementById("result").innerHTML = `
       <h2>You got ${card.name} (${card.rarity})</h2>
-
-      <img src="${card.image}"
-           style="width:220px;border-radius:15px;">
-
-
-  const sound = new Audio(card.sound);
-  sound.volume = 0.7;
-  sound.play();
-
-           
+      <img src="${card.image}" style="width:220px;border-radius:15px;">
     `;
 
     renderInventory();
@@ -367,6 +364,7 @@ function openPack() {
   save();
 }
 
+  
 function renderInventory() {
 
   let div = document.getElementById("inventory");
