@@ -2,121 +2,86 @@
 <html>
 
 <head>
-  <meta charset="UTF-8" />
-  <title>brainrot opener - game</title>
+<meta charset="UTF-8" />
+<title>brainrot opener - game</title>
 
-  <link rel="icon" href="meep (2).ico">
+<link rel="icon" href="meep (2).ico">
 
-  
-    
-    <body>
+<style>
 
+body {
+  margin: 0;
+  font-family: Arial;
+  text-align: center;
+  background: linear-gradient(90deg, #FFD014, #805280);
+}
 
-  <h1>brainrot opener</h1>
-
-  <button onclick="startGame()">play</button>
-  <button onclick="buyPremium()">buy premium</button>
-</div>
-
-
-<div id="game" style="display:none;">
-
-  <h1>brainrot pack opening simulator</h1>
-
-  <button onclick="openPack()">open pack</button>
-  <button onclick="claimDaily()">claim daily pack</button>
-
-  <p>coins: <span id="coins">60</span></p>
-  <p id="premiumText"></p>
-
-  <div id="inventory"></div>
-
-</div>
-
-</body>
-
-  <h1>brainrot opener</h1>
-
-  <button onclick="startGame()">play</button>
-  <button onclick="buyPremium()">buy premium</button>
-  </div>
-
-   <style>
-
-    body.premium {
+body.premium {
   background: url("images__1_-removebg-preview.png") center/cover no-repeat;
   background-attachment: fixed;
   background-size: cover;
 }
 
-    button {
-      padding: 10px 16px;
-      border: none;
-      border-radius: 10px;
-      cursor: pointer;
-      margin: 5px;
-    }
+button {
+  padding: 10px 16px;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  margin: 5px;
+}
 
-    button:hover { transform: scale(1.05); }
+button:hover { transform: scale(1.05); }
 
-    .cardBox {
-      background: #222;
-      border: 2px solid white;
-      border-radius: 12px;
-      padding: 10px;
-      margin: 10px auto;
-      width: 280px;
-    }
+.cardBox {
+  background: #222;
+  border: 2px solid white;
+  border-radius: 12px;
+  padding: 10px;
+  margin: 10px auto;
+  width: 280px;
+}
 
-    #packVideo {
-      width: 300px;
-      border-radius: 12px;
-      display: none;
-      margin: 10px auto;
-    }
 
-    #squishVideo {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      width: 400px;
-      border-radius: 12px;
-      display: none;
-      z-index: 9999;
-    }
-
-    #menu {
+#menu {
   position: fixed;
   inset: 0;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-
   background: linear-gradient(90deg, #FFD014, #805280);
   z-index: 9999;
 }
 
-#menu h1 {
-  font-size: 40px;
-  margin-bottom: 20px;
-}
-
-#menu button {
-  font-size: 20px;
-  margin: 10px;
-}
 
 #game {
   display: none;
 }
-    
-  </style>
+
+#squishVideo {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 400px;
+  display: none;
+  z-index: 9999;
+}
+
+</style>
 </head>
 
 <body>
-  <div id="game" style="display:none;">
+
+
+<div id="menu">
+  <h1>brainrot opener</h1>
+  <button onclick="startGame()">play</button>
+  <button onclick="buyPremium()">buy premium</button>
+</div>
+
+
+<div id="game">
 
 <h1>brainrot pack opening simulator</h1>
 
@@ -131,10 +96,6 @@
 <button onclick="openPack()">open pack</button>
 <button onclick="claimDaily()">claim daily pack</button>
 
-<video id="packVideo" controls>
-  <source src="videos/opening.mp4">
-</video>
-
 <div id="result"></div>
 
 <div id="inventory"></div>
@@ -142,6 +103,8 @@
 <video id="squishVideo" controls>
   <source src="videos/squish.mp4">
 </video>
+
+</div>
 
 <script>
 
@@ -153,6 +116,62 @@ let coins = parseInt(localStorage.getItem("coins")) || 60;
 let premium = localStorage.getItem("premium") === "true";
 
 const DAILY = 11 * 60 * 60 * 1000;
+
+
+window.startGame = function () {
+  document.getElementById("menu").style.display = "none";
+  document.getElementById("game").style.display = "block";
+};
+
+
+function buyPremium() {
+  window.open("https://lorienstox.gumroad.com/l/attrhu", "_blank");
+  premium = true;
+  localStorage.setItem("premium", "true");
+  updateUI();
+}
+
+function redeemCode() {
+  let code = prompt("Enter code:");
+  if (code === "BRAINROT2026") {
+    premium = true;
+    localStorage.setItem("premium", "true");
+    updateUI();
+    alert("premium unlocked!");
+  }
+}
+
+
+function openPack() {
+  if (coins < 10) return alert("not enough coins");
+
+  coins -= 10;
+  packs++;
+
+  let card = randomCard();
+
+  inventory.push(card);
+  save();
+
+  document.getElementById("result").innerText =
+    `You got ${card.name} (${card.rarity})`;
+
+  renderInventory();
+  updateUI();
+}
+
+function claimDaily() {
+  let now = Date.now();
+
+  if (now - lastDaily < DAILY) {
+    alert("come back later");
+    return;
+  }
+
+  lastDaily = now;
+  save();
+  openPack();
+}
 
 
 const Cards = {
@@ -190,94 +209,54 @@ function randomCard() {
 }
 
 
+function renderInventory() {
+  let div = document.getElementById("inventory");
+  div.innerHTML = "";
+
+  inventory.forEach((c, i) => {
+    div.innerHTML += `
+      <div class="cardBox">
+        <b>${c.name}</b><br>
+        ${c.rarity}<br>
+        <button onclick="sell(${i})">sell</button>
+        ${c.name === "tung tung tung sahur" ? `<button onclick="squish()">squish</button>` : ""}
+      </div>
+    `;
+  });
+}
+
+
+function sell(i) {
+  let valueMap = { common:4, uncommon:20, rare:80, epic:300, insane:600 };
+  let earned = valueMap[inventory[i].rarity] || 10;
+
+  if (premium) earned *= 2;
+
+  coins += earned;
+  inventory.splice(i, 1);
+
+  save();
+  renderInventory();
+  updateUI();
+}
+
+  
+function squish() {
+  let v = document.getElementById("squishVideo");
+  v.style.display = "block";
+  v.play();
+
+  v.onended = () => v.style.display = "none";
+}
+
+
 function save() {
   localStorage.setItem("inv", JSON.stringify(inventory));
   localStorage.setItem("packs", packs);
   localStorage.setItem("daily", lastDaily);
   localStorage.setItem("coins", coins);
-  localStorage.setItem("premium", premium);
 }
 
-
-function buyPremium() {
-  window.open("https://lorienstox.gumroad.com/l/attrhu")
-  save();
-  updateUI();
-}
-
-function redeemCode() {
-  let code = prompt("Enter code:");
-  if (code === "BRAINROT2026") {
-    premium = true;
-    save();
-    updateUI();
-    alert("premium unlocked!");
-  } else {
-    alert("invalid code");
-  }
-}
-
-
-function openPack() {
-
-  if (coins < 10) return alert("not enough coins");
-
-  coins -= 10;
-  packs++;
-
-  let card = randomCard();
-
-  let video = document.getElementById("packVideo");
-  video.style.display = "block";
-  video.currentTime = 0;
-  video.play();
-
-  video.onended = () => {
-    video.style.display = "none";
-
-    inventory.push(card);
-    save();
-
-    renderInventory();
-
-    document.getElementById("result").innerText =
-      `You got ${card.name} (${card.rarity})`;
-  };
-
-  updateUI();
-  save();
-}
-
-
-function claimDaily() {
-  let now = Date.now();
-
-  if (now - lastDaily < DAILY) {
-    alert("come back later");
-    return;
-  }
-
-  lastDaily = now;
-  save();
-  openPack();
-}
-
-
-function squish() {
-  const video = document.getElementById("squishVideo");
-  video.style.display = "block";
-  video.currentTime = 0;
-  video.play();
-
-  video.onended = () => {
-    video.style.display = "none";
-  };
-}
-
-  window.startGame = function () {
-  document.getElementById("menu").style.display = "none";
-  document.getElementById("game").style.display = "block";
-};
 
 function updateUI() {
   document.getElementById("coins").innerText = coins;
@@ -286,58 +265,14 @@ function updateUI() {
   document.getElementById("premiumText").innerText =
     premium ? "premium active :3" : "";
 
-  if (premium) {
-    document.body.classList.add("premium");
-  }
-}
-
-function renderInventory() {
-  let div = document.getElementById("inventory");
-  div.innerHTML = "";
-
-  inventory.forEach((c, i) => {
-
-    let btn = `<button onclick="sell(${i})">sell</button>`;
-
-    if (c.name === "tung tung tung sahur") {
-      btn += `<button onclick="squish()">squish</button>`;
-    }
-
-    div.innerHTML += `
-      <div class="cardBox">
-        <b>${c.name}</b><br>
-        ${c.rarity}<br>
-        ${btn}
-      </div>
-    `;
-  });
-}
-
-
-function value(r) {
-  return { common:4, uncommon:20, rare:80, epic:300, insane:600 }[r] || 10;
-}
-
-function sell(i) {
-  let earned = value(inventory[i].rarity);
-
-  if (premium) earned *= 2;
-
-  coins += earned;
-  inventory.splice(i, 1);
-
-  save();
-  updateUI();
-  renderInventory();
+  if (premium) document.body.classList.add("premium");
 }
 
 
 updateUI();
 renderInventory();
 
-
 </script>
 
-</div>
 </body>
 </html>
