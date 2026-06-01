@@ -193,25 +193,37 @@ function randomCard() {
   window.open("https://lorienstox.gumroad.com/l/attrhu", "_blank");
 }
 
-  function redeemCode() {
+function redeemCode() {
 
-  let code = prompt("Enter your code:");
+  if (serverCodes.length === 0) {
+    alert("codes still loading... try again");
+    return;
+  }
 
+  let code = prompt("Enter premium code:");
   if (!code) return;
 
   code = code.trim().toUpperCase();
 
-  if (code === "BRAINROT2026") {
-
-    localStorage.setItem("premium", "true");
-
-    alert("premium unlocked!, sell value is now 2x!");
-
-  } else {
-
+  if (!serverCodes.includes(code)) {
     alert("Invalid code");
-
+    return;
   }
+
+  if (usedCodes.includes(code)) {
+    alert("Code already used on this device");
+    return;
+  }
+
+  premium = true;
+  localStorage.setItem("premium", "true");
+
+  usedCodes.push(code);
+  localStorage.setItem("usedCodes", JSON.stringify(usedCodes));
+
+  updateUI(); // (important missing UI refresh)
+
+  alert("Premium unlocked! 2x sell coins active.");
 }
 
 function value(r) {
@@ -335,6 +347,14 @@ function claimDaily() {
   openPack();
 }
 
+let serverCodes = [];
+let usedCodes = JSON.parse(localStorage.getItem("usedCodes") || "[]");
+
+async function loadCodes() {
+  let res = await fetch("codes.json");
+  serverCodes = await res.json();
+}
+  
 function updateTimer() {
   let el = document.getElementById("timer");
   let left = DAILY - (Date.now() - lastDaily);
@@ -360,6 +380,7 @@ setInterval(() => {
 
 renderInventory();
 renderShelf();
+loadCodes();
 
 </script>
 
