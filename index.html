@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="UTF-8" />
-  <title>Brainrot Pack Simulator</title>
+  <title>brainrot opener - game</title>
 
   <link rel="icon" href="meep (2).ico">
 
@@ -96,10 +96,8 @@
 
 <h1>brainrot pack opening simulator</h1>
 
-
-
 <button onclick="buyWallpaperPack()">
-buy premium!($2.50)
+buy premium :3 ($2.50)
 </button>
 
 <button onclick="redeemCode()">
@@ -109,7 +107,6 @@ redeem code
 <p id="premiumText"></p>
 
 <p>packs opened: <span id="count">0</span></p>
-<p id="timer"></p>
 
 <button onclick="openPack()">open pack</button>
 <button onclick="claimDaily()">claim daily pack</button>
@@ -155,6 +152,8 @@ let premium = localStorage.getItem("premium") === "true";
 
 document.getElementById("count").innerText = packs;
 
+const PREMIUM_CODE = "BRAINROT2026";
+
 const Cards = {
   epic: { "tralalero tralala": "epic" },
   insane: { "apple pen dude": "insane" },
@@ -189,41 +188,30 @@ function randomCard() {
   return { name, rarity: pool[name] };
 }
 
-  function buyWallpaperPack() {
+function buyWallpaperPack() {
   window.open("https://lorienstox.gumroad.com/l/attrhu", "_blank");
 }
 
-function redeemCode() {
 
-  if (serverCodes.length === 0) {
-    alert("codes still loading... try again");
-    return;
-  }
+function redeemCode() {
 
   let code = prompt("Enter premium code:");
   if (!code) return;
 
   code = code.trim().toUpperCase();
 
-  if (!serverCodes.includes(code)) {
-    alert("Invalid code");
-    return;
+  if (code === PREMIUM_CODE) {
+
+    premium = true;
+    localStorage.setItem("premium", "true");
+
+    updateUI();
+
+    alert("premium unlocked!, 2x sell coins active");
+
+  } else {
+    alert("invalid code");
   }
-
-  if (usedCodes.includes(code)) {
-    alert("Code already used on this device");
-    return;
-  }
-
-  premium = true;
-  localStorage.setItem("premium", "true");
-
-  usedCodes.push(code);
-  localStorage.setItem("usedCodes", JSON.stringify(usedCodes));
-
-  updateUI(); // (important missing UI refresh)
-
-  alert("Premium unlocked! 2x sell coins active.");
 }
 
 function value(r) {
@@ -235,7 +223,7 @@ function updateUI() {
   document.getElementById("count").innerText = packs;
 
   document.getElementById("premiumText").innerText =
-  premium ? "⭐ PREMIUM ACTIVE (2x sell coins)" : "";
+    premium ? " premium is active btw (2x sell coins! :3)" : "";
 }
 
 function save() {
@@ -269,9 +257,9 @@ function renderInventory() {
 function sell(i) {
   let earned = value(inventory[i].rarity);
 
-if (premium) {
-  earned *= 2;
-}
+  if (premium) {
+    earned *= 2;
+  }
 
   coins += earned;
   inventory.splice(i,1);
@@ -301,7 +289,7 @@ function openPack() {
   let card = randomCard();
 
   if (coins < 10) {
-    alert("Not enough coins!");
+    alert("not enough coins");
     return;
   }
 
@@ -347,14 +335,6 @@ function claimDaily() {
   openPack();
 }
 
-let serverCodes = [];
-let usedCodes = JSON.parse(localStorage.getItem("usedCodes") || "[]");
-
-async function loadCodes() {
-  let res = await fetch("codes.json");
-  serverCodes = await res.json();
-}
-  
 function updateTimer() {
   let el = document.getElementById("timer");
   let left = DAILY - (Date.now() - lastDaily);
@@ -380,7 +360,6 @@ setInterval(() => {
 
 renderInventory();
 renderShelf();
-loadCodes();
 
 </script>
 
