@@ -55,6 +55,7 @@
       margin: 10px auto;
       width: 280px;
     }
+    
 
     #shelfContainer {
       width: 700px;
@@ -77,6 +78,16 @@
       text-shadow: 0 0 10px rgba(255,255,255,0.6);
     }
 
+    .wallpaperCard {
+  background: #222;
+  border: 2px solid white;
+  border-radius: 12px;
+  padding: 10px;
+  margin: 10px auto;
+  width: 280px;
+  cursor: pointer;
+}
+
     #shelfScroll {
       position: absolute;
       top: 20px;
@@ -87,6 +98,8 @@
       max-height: 300px;
       padding: 10px;
     }
+
+    
   </style>
 </head>
 
@@ -108,6 +121,12 @@
 <video id="packVideo" controls>
   <source src="videos/opening.mp4">
 </video>
+
+<h2>wallpaper shop</h2>
+
+<div id="shop"></div>
+
+<button onclick="applyWallpaper()">apply wallpaper</button>
 
 <div id="result"></div>
 
@@ -139,6 +158,8 @@ let packs = parseInt(localStorage.getItem("packs")) || 0;
 let inventory = JSON.parse(localStorage.getItem("inv") || "[]");
 let lastDaily = parseInt(localStorage.getItem("daily")) || 0;
 let coins = parseInt(localStorage.getItem("coins")) || 60;
+let wallpapers = JSON.parse(localStorage.getItem("walls") || "[]");
+let selectedWallpaper = localStorage.getItem("selectedWall") || "";
 
 document.getElementById("count").innerText = packs;
 
@@ -219,6 +240,67 @@ function sell(i) {
   save();
   updateUI();
   renderInventory();
+}
+
+  const WallpaperShop = [
+  { name: "gold glow", file: "wall1.jpg", price: 50 },
+  { name: "purple storm", file: "wall2.jpg", price: 100 },
+  { name: "brainrot neon", file: "wall3.jpg", price: 200 }
+];
+
+  function renderShop() {
+  let div = document.getElementById("shop");
+  div.innerHTML = "";
+
+  WallpaperShop.forEach((w, i) => {
+    div.innerHTML += `
+      <div class="wallpaperCard">
+        <b>${w.name}</b><br>
+        price: ${w.price}<br>
+        <button onclick="buyWallpaper(${i})">buy</button>
+      </div>
+    `;
+  });
+}
+
+  function buyWallpaper(i) {
+  let w = WallpaperShop[i];
+
+  if (coins < w.price) {
+    alert("not enough coins!");
+    return;
+  }
+
+  coins -= w.price;
+  wallpapers.push(w.file);
+
+  save();
+  updateUI();
+  localStorage.setItem("walls", JSON.stringify(wallpapers));
+
+  alert("purchased " + w.name);
+}
+
+  function applyWallpaper() {
+  if (wallpapers.length === 0) {
+    alert("no wallpapers owned!");
+    return;
+  }
+
+  let pick = wallpapers[wallpapers.length - 1];
+  selectedWallpaper = pick;
+
+  document.body.style.background = `url('images/${pick}')`;
+  document.body.style.backgroundSize = "cover";
+
+  localStorage.setItem("selectedWall", pick);
+}
+
+  function loadWallpaper() {
+  if (!selectedWallpaper) return;
+
+  document.body.style.background = `url('images/${selectedWallpaper}')`;
+  document.body.style.backgroundSize = "cover";
 }
 
 function squish() {
@@ -313,6 +395,9 @@ setInterval(() => {
 
 renderInventory();
 renderShelf();
+
+renderShop();
+loadWallpaper();
 
 </script>
 
