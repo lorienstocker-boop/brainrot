@@ -96,7 +96,7 @@
 
 <h1>brainrot pack opening simulator</h1>
 
-<p id="premiumText"></p>
+
 
 <button onclick="buyWallpaperPack()">
 buy premium!($2.50)
@@ -105,6 +105,8 @@ buy premium!($2.50)
 <button onclick="redeemCode()">
 redeem code
 </button>
+
+<p id="premiumText"></p>
 
 <p>packs opened: <span id="count">0</span></p>
 <p id="timer"></p>
@@ -221,7 +223,7 @@ function updateUI() {
   document.getElementById("count").innerText = packs;
 
   document.getElementById("premiumText").innerText =
-    premium ? "⭐ PREMIUM ACTIVE (2x sell coins)" : "";
+  premium ? "⭐ PREMIUM ACTIVE (2x sell coins)" : "";
 }
 
 function save() {
@@ -259,7 +261,7 @@ if (premium) {
   earned *= 2;
 }
 
-coins += earned;
+  coins += earned;
   inventory.splice(i,1);
   save();
   updateUI();
