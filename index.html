@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html>
 
@@ -9,16 +10,6 @@
 
 <style>
 
-  p, h1, h2, h3, span {
-    transition: transform 0.15s ease, text-shadow 0.15s ease;
-    display: inline-block;
-  }
-
-  p:hover, h1:hover, h2:hover, h3:hover, span:hover {
-  transform: scale(1.08);
-  text-shadow: 0 0 10px rgba(255,255,255,0.6);
-}
-
 html, body {
   margin: 0;
   width: 100%;
@@ -27,6 +18,16 @@ html, body {
   font-family: Arial;
   text-align: center;
   color: white;
+}
+
+p, h1, h2, h3, span {
+  transition: transform 0.15s ease, text-shadow 0.15s ease;
+  display: inline-block;
+}
+
+p:hover, h1:hover, h2:hover, h3:hover, span:hover {
+  transform: scale(1.08);
+  text-shadow: 0 0 10px rgba(255,255,255,0.6);
 }
 
 body.menu {
@@ -60,9 +61,17 @@ button {
   border-radius: 10px;
   cursor: pointer;
   margin: 5px;
+  font-size: 16px;
 }
 
-button:hover { transform: scale(1.05); }
+button:hover {
+  transform: scale(1.05);
+}
+
+#game {
+  display: none;
+  padding-top: 20px;
+}
 
 .cardBox {
   background: #222;
@@ -73,9 +82,9 @@ button:hover { transform: scale(1.05); }
   width: 280px;
 }
 
-
-#game {
-  display: none;
+#result img,
+.cardBox img {
+  box-shadow: 0 0 15px rgba(255,255,255,0.4);
 }
 
 #squishVideo {
@@ -93,13 +102,15 @@ button:hover { transform: scale(1.05); }
 
 <body class="menu">
 
-
 <div id="menu">
   <h1>brainrot opener</h1>
-  <button onclick="startGame()">play</button>
-  <button onclick="buyPremium()">buy premium :3</button>
-</div>
 
+  <button onclick="startGame()">play</button>
+
+  <button onclick="buyPremium()">
+    buy premium :3
+  </button>
+</div>
 
 <div id="game">
 
@@ -110,29 +121,39 @@ button:hover { transform: scale(1.05); }
 
 <p id="premiumText"></p>
 
+<br>
+
 <p>coins: <span id="coins">60</span></p>
-<p>next daily pack in: <span id="dailyTimer"></span></p>
+<br>
 <p>packs opened: <span id="count">0</span></p>
+<br>
+<p>next daily pack in: <span id="dailyTimer"></span></p>
+
+<br><br>
 
 <button onclick="openPack()">open pack</button>
 <button onclick="claimDaily()">claim daily pack</button>
 
+<br><br>
+
 <div id="result"></div>
 
+<h2>inventory</h2>
 <div id="inventory"></div>
 
 <video id="squishVideo" controls>
   <source src="videos/squish.mp4">
 </video>
 
-<video id="packVideo" controls style="width:300px; display:none; margin:10px auto;">
+<video id="packVideo"
+       controls
+       style="width:300px; display:none; margin:10px auto;">
   <source src="videos/opening.mp4">
 </video>
 
 </div>
 
 <script>
-
 
 let packs = parseInt(localStorage.getItem("packs")) || 0;
 let inventory = JSON.parse(localStorage.getItem("inv") || "[]");
@@ -141,6 +162,7 @@ let coins = parseInt(localStorage.getItem("coins")) || 60;
 let premium = localStorage.getItem("premium") === "true";
 
 const DAILY = 11 * 60 * 60 * 1000;
+
 window.startGame = function () {
 
   document.body.classList.remove("menu");
@@ -151,55 +173,41 @@ window.startGame = function () {
 };
 
 function buyPremium() {
-  window.open("https://lorienstox.gumroad.com/l/attrhu", "_blank");
+
+  window.open(
+    "https://lorienstox.gumroad.com/l/attrhu",
+    "_blank"
+  );
+
   premium = true;
+
   localStorage.setItem("premium", "true");
+
   updateUI();
 }
 
 function redeemCode() {
+
   let code = prompt("Enter code:");
+
   if (code === "BRAINROT2026") {
+
     premium = true;
+
     localStorage.setItem("premium", "true");
+
     updateUI();
+
     alert("premium unlocked!");
   }
 }
 
-
-function openPack() {
-  if (coins < 10) return alert("not enough coins :O");
-
-  coins -= 10;
-  packs++;
-
-  let card = randomCard();
-
-  let video = document.getElementById("packVideo");
-  video.style.display = "block";
-  video.currentTime = 0;
-  video.play();
-
-  video.onended = () => {
-    video.style.display = "none";
-
-    inventory.push(card);
-    save();
-
-document.getElementById("result").innerHTML = `
-  <h2>You got ${card.name} (${card.rarity})</h2>
-
-  <img src="${card.image}"
-       style="width:220px;border-radius:15px;">
-`;
-
-
 const Cards = {
+
   epic: {
     "tralalero tralala": {
       rarity: "epic",
-      image: "images/tralala.png"
+      image: "images/tralalero tralala.png"
     }
   },
 
@@ -211,6 +219,7 @@ const Cards = {
   },
 
   rare: {
+
     "ballerina cappucina": {
       rarity: "rare",
       image: "images/ballerina cappucina.png"
@@ -228,6 +237,7 @@ const Cards = {
   },
 
   uncommon: {
+
     "bombardino crocodilo": {
       rarity: "uncommon",
       image: "images/bombardino crocodilo.png"
@@ -245,6 +255,7 @@ const Cards = {
   },
 
   common: {
+
     "skibidi": {
       rarity: "common",
       image: "images/skibidi.png"
@@ -263,6 +274,7 @@ const Cards = {
 };
 
 function randomCard() {
+
   let r = Math.random();
 
   let pool =
@@ -273,6 +285,7 @@ function randomCard() {
     Cards.common;
 
   let keys = Object.keys(pool);
+
   let name = keys[Math.floor(Math.random() * keys.length)];
 
   return {
@@ -282,24 +295,119 @@ function randomCard() {
   };
 }
 
+function openPack() {
+
+  if (coins < 10) {
+    return alert("not enough coins :O");
+  }
+
+  coins -= 10;
+  packs++;
+
+  let card = randomCard();
+
+  let video = document.getElementById("packVideo");
+
+  video.style.display = "block";
+  video.currentTime = 0;
+  video.play();
+
+  video.onended = () => {
+
+    video.style.display = "none";
+
+    inventory.push(card);
+
+    save();
+
+    document.getElementById("result").innerHTML = `
+      <h2>You got ${card.name} (${card.rarity})</h2>
+
+      <img src="${card.image}"
+           style="width:220px;border-radius:15px;">
+    `;
+
+    renderInventory();
+    updateUI();
+  };
+
+  updateUI();
+  save();
+}
 
 function renderInventory() {
+
   let div = document.getElementById("inventory");
+
   div.innerHTML = "";
 
   inventory.forEach((c, i) => {
+
     div.innerHTML += `
+
       <div class="cardBox">
+
+        <img src="${c.image}"
+             style="width:180px;border-radius:10px;">
+
+        <br><br>
+
         <b>${c.name}</b><br>
-        ${c.rarity}<br>
-        <button onclick="sell(${i})">sell</button>
-        ${c.name === "tung tung tung sahur" ? `<button onclick="squish()">squish</button>` : ""}
+        ${c.rarity}<br><br>
+
+        <button onclick="sell(${i})">
+          sell
+        </button>
+
+        ${c.name === "tung tung tung sahur"
+          ? `<button onclick="squish()">squish</button>`
+          : ""
+        }
+
       </div>
     `;
   });
 }
 
-    function claimDaily() {
+function sell(i) {
+
+  let valueMap = {
+    common: 4,
+    uncommon: 20,
+    rare: 80,
+    epic: 300,
+    insane: 600
+  };
+
+  let earned = valueMap[inventory[i].rarity] || 10;
+
+  if (premium) {
+    earned *= 2;
+  }
+
+  coins += earned;
+
+  inventory.splice(i, 1);
+
+  save();
+  renderInventory();
+  updateUI();
+}
+
+function squish() {
+
+  let v = document.getElementById("squishVideo");
+
+  v.style.display = "block";
+
+  v.play();
+
+  v.onended = () => {
+    v.style.display = "none";
+  };
+}
+
+function claimDaily() {
 
   let now = Date.now();
 
@@ -309,6 +417,7 @@ function renderInventory() {
   }
 
   lastDaily = now;
+
   coins += 30;
 
   save();
@@ -317,75 +426,63 @@ function renderInventory() {
   alert("daily reward claimed! +30 coins");
 }
 
+function updateDailyTimer() {
 
-function sell(i) {
-  let valueMap = { common:4, uncommon:20, rare:80, epic:300, insane:600 };
-  let earned = valueMap[inventory[i].rarity] || 10;
+  let now = Date.now();
 
-  if (premium) earned *= 2;
+  let remaining = DAILY - (now - lastDaily);
 
-  coins += earned;
-  inventory.splice(i, 1);
+  if (remaining <= 0) {
 
-  save();
-  renderInventory();
-  updateUI();
+    document.getElementById("dailyTimer").innerText = "READY!";
+
+    return;
+  }
+
+  let hours = Math.floor(remaining / (1000 * 60 * 60));
+
+  let mins = Math.floor(
+    (remaining % (1000 * 60 * 60)) / (1000 * 60)
+  );
+
+  let secs = Math.floor(
+    (remaining % (1000 * 60)) / 1000
+  );
+
+  document.getElementById("dailyTimer").innerText =
+    `${hours}h ${mins}m ${secs}s`;
 }
-
-  
-function squish() {
-  let v = document.getElementById("squishVideo");
-  v.style.display = "block";
-  v.play();
-
-  v.onended = () => v.style.display = "none";
-}
-
 
 function save() {
+
   localStorage.setItem("inv", JSON.stringify(inventory));
   localStorage.setItem("packs", packs);
   localStorage.setItem("daily", lastDaily);
   localStorage.setItem("coins", coins);
 }
 
-
 function updateUI() {
+
   document.getElementById("coins").innerText = coins;
   document.getElementById("count").innerText = packs;
 
   document.getElementById("premiumText").innerText =
     premium ? "premium active :3" : "";
 
-  if (premium) document.body.classList.add("premium");
-}
-
-    function updateDailyTimer() {
-
-  let now = Date.now();
-  let remaining = DAILY - (now - lastDaily);
-
-  if (remaining <= 0) {
-    document.getElementById("dailyTimer").innerText = "READY!";
-    return;
+  if (premium) {
+    document.body.classList.remove("game");
+    document.body.classList.add("premium");
   }
-
-  let hours = Math.floor(remaining / (1000 * 60 * 60));
-  let mins = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
-  let secs = Math.floor((remaining % (1000 * 60)) / 1000);
-
-  document.getElementById("dailyTimer").innerText =
-    `${hours}h ${mins}m ${secs}s`;
 }
 
 setInterval(updateDailyTimer, 1000);
-updateDailyTimer();
-
 
 updateUI();
+updateDailyTimer();
 renderInventory();
 
 </script>
 
 </body>
 </html>
+```
