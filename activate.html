@@ -1,18 +1,62 @@
-<H1>premium store idk??</H1>
+<!DOCTYPE html>
+<html>
 
-<p>thanks for supporting the game! :3</p>
+<head>
+<title>premium page idk??</title>
 
-<button onclick="activate()">unlock premium (click me!)</button>
+<style>
+body {
+  background:#111;
+  color:white;
+  font-family:Arial;
+  text-align:center;
+  padding-top:100px;
+}
+
+button {
+  padding:15px 25px;
+  border:none;
+  border-radius:10px;
+  background:#333;
+  color:white;
+  cursor:pointer;
+  font-size:18px;
+}
+
+button:hover {
+  background:#ff004d;
+}
+</style>
+
+</head>
+
+<body>
+
+<h1>brainrot opener premium :3</h1>
+
+<p>Thanks for supporting the game!!</p>
+
+<p>if you bought with gumroad(you probably did), click below:</p>
+
+<button onclick="activatePremium()">
+activate premium! :3
+</button>
+
 
 <script>
-  function activate(){
-    localstorage.setItem("premium","true");
 
-    alert("premium activated! Yay! :3 tysm u the goat");
+function activatePremium(){
 
-    window.location.href="index.html";
-  }
+  localStorage.setItem("premium","true");
+
+  alert("premium activated!!! :3");
+
+  window.location.href="index.html";
+
+}
+
 </script>
 
 </body>
+
 </html>
