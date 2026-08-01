@@ -113,6 +113,14 @@ p:hover, span:hover, a:hover, button:hover, li:hover {
   <button onclick="buyPremium()">buy premium</button>
 </div>
 
+<h2>exchange your cards for better ones here!</h2>
+
+<div id="store">
+  <p>Premium only!</p>
+  <p>$200 each exchange</p>
+  <button onclick="exchangeCard()">exchange your card! :3</button>
+</div>
+
 <div id="game">
 
 <h1>brainrot pack opening simulator :3 BLEHH!!</h1>
@@ -271,6 +279,75 @@ function randomCard() {
   };
 }
 
+function exchangeSpecific(i) {
+
+  if (!premium) {
+    alert("you need premium :(");
+    return;
+  }
+
+  const EXCHANGE_COST = 200;
+
+  if (coins < EXCHANGE_COST) {
+    alert("you cannot afford that :( get at least 200 coins to buy :3")
+    return;
+  }
+
+
+  let oldCard = inventory[i];
+
+
+  let upgrades = {
+    common: "uncommon",
+    uncommon: "rare",
+    rare: "epic",
+    epic: "insane"
+  };
+
+
+  let newRarity = upgrades[oldCard.rarity];
+
+
+  if (!newRarity) {
+    alert("that card is max rarity bruh...");
+    return;
+  }
+
+
+  let possible = Object.keys(Cards[newRarity]);
+
+  let newName = possible[Math.floor(Math.random() * possible.length)];
+
+  let newData = Cards[newRarity][newName];
+
+
+  let newCard = {
+    name: newName,
+    rarity: newData.rarity,
+    image: newData.image,
+    sound: newData.sound || null
+  };
+
+
+
+  inventory[i] = newCard;
+
+
+  save();
+  renderInventory();
+  updateUI();
+
+  coins -= EXCHANGE_COST;
+
+
+  alert(
+    ` upgraded! :3\n\n` +
+    `${oldCard.name} (${oldCard.rarity})\n` +
+    `to...\n` +
+    `${newCard.name} (${newCard.rarity})`
+  );
+}
+
 function openPack() {
 
   if (coins < 10) return alert("not enough coins :O");
@@ -331,6 +408,11 @@ function renderInventory() {
         ${c.rarity}<br><br>
 
         <button onclick="sell(${i})">sell</button>
+
+${premium 
+  ? `<button onclick="exchangeSpecific(${i})">exchange ↑</button>`
+  : ""
+}
 
         ${c.name === "tung tung tung sahur"
           ? `<button onclick="squish()">squish</button>`
