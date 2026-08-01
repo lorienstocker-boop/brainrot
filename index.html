@@ -113,13 +113,6 @@ p:hover, span:hover, a:hover, button:hover, li:hover {
   <button onclick="buyPremium()">buy premium</button>
 </div>
 
-<h2>exchange your cards for better ones here!</h2>
-
-<div id="store">
-  <p>Premium only!</p>
-  <p>$200 each exchange</p>
-  <button onclick="exchangeCard()">exchange your card! :3</button>
-</div>
 
 <div id="game">
 
@@ -179,17 +172,6 @@ function buyPremium() {
   window.location.href = "https://lorienstox.gumroad.com/l/attrhu";
 }
 
-  
-
-function redeemCode() {
-  let code = prompt("Enter code:");
-  if (code === "BRAINROT2026") {
-    premium = true;
-    localStorage.setItem("premium", "true");
-    updateUI();
-    alert("premium unlocked!");
-  }
-}
 
 const Cards = {
 
@@ -290,10 +272,15 @@ function randomCard() {
 
 function exchangeSpecific(i) {
 
+
+
   if (!premium) {
     alert("you need premium :(");
     return;
   }
+
+let oldCard = inventory[i];
+let cost = exchangeCosts[oldCard.rarity];
 
   const EXCHANGE_COST = 200;
 
@@ -341,11 +328,12 @@ function exchangeSpecific(i) {
   inventory[i] = newCard;
 
 
+ coins -= cost;
+  
   save();
   renderInventory();
   updateUI();
 
-  coins -= cost;
 
   
   alert(
