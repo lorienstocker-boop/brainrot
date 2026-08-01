@@ -272,25 +272,18 @@ function randomCard() {
 
 function exchangeSpecific(i) {
 
-
-
   if (!premium) {
     alert("you need premium :(");
     return;
   }
 
-let oldCard = inventory[i];
-let cost = exchangeCosts[oldCard.rarity];
-
-  const EXCHANGE_COST = 200;
-
-  if (coins < cost) {
-  alert(`you need ${cost} coin(s) to exchange this card :(`);
-  return;
-}
-
+  let oldCard = inventory[i];
   let cost = exchangeCosts[oldCard.rarity];
 
+  if (coins < cost) {
+    alert(`you need ${cost} coin(s) to exchange this card :(`);
+    return;
+  }
 
   let upgrades = {
     common: "uncommon",
@@ -299,22 +292,18 @@ let cost = exchangeCosts[oldCard.rarity];
     epic: "insane"
   };
 
-
   let newRarity = upgrades[oldCard.rarity];
-
 
   if (!newRarity) {
     alert("that card is max rarity bruh...");
     return;
   }
 
-
   let possible = Object.keys(Cards[newRarity]);
 
   let newName = possible[Math.floor(Math.random() * possible.length)];
 
   let newData = Cards[newRarity][newName];
-
 
   let newCard = {
     name: newName,
@@ -323,26 +312,21 @@ let cost = exchangeCosts[oldCard.rarity];
     sound: newData.sound || null
   };
 
-
-
   inventory[i] = newCard;
 
+  coins -= cost;
 
- coins -= cost;
-  
   save();
   renderInventory();
   updateUI();
 
-
-  
   alert(
-  ` upgraded! :3\n\n` +
-  `${oldCard.name} (${oldCard.rarity})\n` +
-  `now its:\n` +
-  `${newCard.name} (${newCard.rarity})\n\n` +
-  `-${cost} coins`
-);
+    ` upgraded! :3\n\n` +
+    `${oldCard.name} (${oldCard.rarity})\n` +
+    `now its:\n` +
+    `${newCard.name} (${newCard.rarity})\n\n` +
+    `-${cost} coins`
+  );
 }
 
 function openPack() {
