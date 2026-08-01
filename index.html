@@ -179,6 +179,8 @@ function buyPremium() {
   window.location.href = "https://lorienstox.gumroad.com/l/attrhu";
 }
 
+  
+
 function redeemCode() {
   let code = prompt("Enter code:");
   if (code === "BRAINROT2026") {
@@ -279,6 +281,13 @@ function randomCard() {
   };
 }
 
+  const exchangeCosts = {
+  common: 200,
+  uncommon: 500,
+  rare: 1200,
+  epic: 3000
+};
+
 function exchangeSpecific(i) {
 
   if (!premium) {
@@ -288,13 +297,12 @@ function exchangeSpecific(i) {
 
   const EXCHANGE_COST = 200;
 
-  if (coins < EXCHANGE_COST) {
-    alert("you cannot afford that :( get at least 200 coins to buy :3")
-    return;
-  }
+  if (coins < cost) {
+  alert(`you need ${cost} coin(s) to exchange this card :(`);
+  return;
+}
 
-
-  let oldCard = inventory[i];
+  let cost = exchangeCosts[oldCard.rarity];
 
 
   let upgrades = {
@@ -337,15 +345,16 @@ function exchangeSpecific(i) {
   renderInventory();
   updateUI();
 
-  coins -= EXCHANGE_COST;
+  coins -= cost;
 
-
+  
   alert(
-    ` upgraded! :3\n\n` +
-    `${oldCard.name} (${oldCard.rarity})\n` +
-    `to...\n` +
-    `${newCard.name} (${newCard.rarity})`
-  );
+  ` upgraded! :3\n\n` +
+  `${oldCard.name} (${oldCard.rarity})\n` +
+  `now its:\n` +
+  `${newCard.name} (${newCard.rarity})\n\n` +
+  `-${cost} coins`
+);
 }
 
 function openPack() {
@@ -409,10 +418,15 @@ function renderInventory() {
 
         <button onclick="sell(${i})">sell</button>
 
-${premium 
-  ? `<button onclick="exchangeSpecific(${i})">exchange ↑</button>`
+        
+${premium && exchangeCosts[c.rarity]
+  ? `<button onclick="exchangeSpecific(${i})">
+       exchange (${exchangeCosts[c.rarity]}🪙)
+     </button>`
   : ""
 }
+
+
 
         ${c.name === "tung tung tung sahur"
           ? `<button onclick="squish()">squish</button>`
